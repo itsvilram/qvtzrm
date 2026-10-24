@@ -34,6 +34,13 @@ export function formatPower(mw: number | null, unit: 'auto' | 'MW' | 'GW' = 'aut
   return withSign(power(mw, unit), mw, false)
 }
 
+/** A range in one unit for both ends: `5.9–10.4 GW`, not `5,867 MW – 10.4 GW`. */
+export function formatPowerRange(lowMw: number, highMw: number): string {
+  const useGw = Math.max(Math.abs(lowMw), Math.abs(highMw)) >= GW_THRESHOLD_MW
+  const end = (mw: number) => withSign(useGw ? number(mw / 1000, 1) : number(mw, 0), mw, false)
+  return `${end(lowMw)}–${end(highMw)} ${useGw ? 'GW' : 'MW'}`
+}
+
 /** Like formatPower, but always shows the sign: `+520 MW`, `−1.3 GW`, `0 MW`. */
 export function formatSigned(mw: number | null, unit: 'auto' | 'MW' | 'GW' = 'auto'): string {
   if (mw === null) return EMPTY

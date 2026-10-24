@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../App.tsx'
-import { META } from './fixtures.ts'
+import { DAY_AHEAD, META } from './fixtures.ts'
 import { json, mockApi, renderWithClient } from './render.tsx'
 
 beforeEach(() => window.history.replaceState(null, '', '/'))
@@ -10,7 +10,7 @@ afterEach(() => vi.unstubAllGlobals())
 
 describe('App shell', () => {
   it('shows the header and where the data came from', async () => {
-    mockApi({ '/api/meta': () => json(200, META) })
+    mockApi({ '/api/meta': () => json(200, META), '/api/day-ahead': () => json(200, DAY_AHEAD) })
 
     renderWithClient(<App />)
 
@@ -33,7 +33,7 @@ describe('App shell', () => {
   })
 
   it('switching tabs shows the other view and updates the URL', async () => {
-    mockApi({ '/api/meta': () => json(200, META) })
+    mockApi({ '/api/meta': () => json(200, META), '/api/day-ahead': () => json(200, DAY_AHEAD) })
     renderWithClient(<App />)
 
     await userEvent.click(await screen.findByRole('tab', { name: 'Forecast accuracy' }))
@@ -47,7 +47,7 @@ describe('App shell', () => {
   })
 
   it('arrow keys move between tabs', async () => {
-    mockApi({ '/api/meta': () => json(200, META) })
+    mockApi({ '/api/meta': () => json(200, META), '/api/day-ahead': () => json(200, DAY_AHEAD) })
     renderWithClient(<App />)
     const dayAhead = await screen.findByRole('tab', { name: 'Day-ahead view' })
 

@@ -5,6 +5,7 @@ import {
   formatHoursRange,
   formatPercent,
   formatPower,
+  formatPowerRange,
   formatSigned,
   formatUkDate,
   formatUkDateTime,
@@ -27,6 +28,14 @@ describe('formatPower', () => {
   it('uses a real minus sign and a dash for missing values', () => {
     expect(formatPower(-3550)).toBe('−3,550 MW')
     expect(formatPower(null)).toBe('—')
+  })
+})
+
+describe('formatPowerRange', () => {
+  it('uses one unit for both ends', () => {
+    expect(formatPowerRange(5867, 10_400)).toBe('5.9–10.4 GW')
+    expect(formatPowerRange(3200, 8100)).toBe('3,200–8,100 MW')
+    expect(formatPowerRange(-549, 4098)).toBe('−549–4,098 MW')
   })
 })
 

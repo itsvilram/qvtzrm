@@ -56,7 +56,13 @@ function Dashboard({ meta }: { meta: Meta }) {
       <main className="container">
         <TabPanel tab={state.tab}>
           {state.tab === 'day-ahead' ? (
-            <DayAheadPage date={state.date} cutoff={state.cutoff} />
+            <DayAheadPage
+              date={state.date}
+              cutoff={state.cutoff}
+              minDate={limits.minDate}
+              maxDate={limits.maxDate}
+              onChange={update}
+            />
           ) : (
             <AccuracyPage cutoff={state.cutoff} />
           )}

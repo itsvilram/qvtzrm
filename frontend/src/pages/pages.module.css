@@ -1,0 +1,34 @@
+/* While new data loads, the previous view stays visible but faded (no layout jump). */
+.stale {
+  opacity: 0.55;
+  transition: opacity 0.2s;
+}
+
+.context {
+  color: var(--text-secondary);
+}
+
+.context strong {
+  color: var(--text-primary);
+  font-weight: 650;
+}
+
+.notes {
+  margin: 0;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-6);
+  border-left: 3px solid var(--status-warning);
+  border-radius: var(--radius-small);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.sectionHint {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}

@@ -13,13 +13,10 @@ describe('chart colours', () => {
     expect(css).toMatch(new RegExp(`${name}:\\s*#`))
   })
 
-  it.each([
-    '--series-forecast',
-    '--series-actual',
-    '--band',
-    '--under-forecast',
-    '--over-forecast',
-  ])('%s has its own dark-mode value', (name) => {
-    expect(darkBlock).toMatch(new RegExp(`${name}:\\s*#`))
-  })
+  it.each(['--series-forecast', '--series-actual', '--under-forecast', '--over-forecast'])(
+    '%s has its own dark-mode value',
+    (name) => {
+      expect(darkBlock).toMatch(new RegExp(`${name}:\\s*#`))
+    },
+  )
 })

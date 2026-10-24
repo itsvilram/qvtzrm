@@ -39,7 +39,7 @@ Same as the backend:
 | 2 | [Styles, colours and number formats](#task-2--styles-colours-and-number-formats) | 15 min | ✅ |
 | 3 | [API layer and URL state](#task-3--api-layer-and-url-state) | 20 min | ✅ |
 | 4 | [App shell (header, tabs, loading/error states)](#task-4--app-shell) | 15 min | ✅ |
-| 5 | [Day-ahead view](#task-5--day-ahead-view) | 40 min | ⬜ |
+| 5 | [Day-ahead view](#task-5--day-ahead-view) | 40 min | ✅ |
 | 6 | [Forecast accuracy view](#task-6--forecast-accuracy-view) | 45 min | ⬜ |
 | 7 | [Responsive layout, accessibility, polish](#task-7--responsive-layout-accessibility-polish) | 15 min | ⬜ |
 | 8 | [Docker + docker compose (full stack)](#task-8--docker--docker-compose) | 20 min | ⬜ |
@@ -195,42 +195,50 @@ Same as the backend:
 ---
 
 ## Task 5 – Day-ahead view
-**Status:** ⬜ · **Depends on:** 4
+**Status:** ✅ Done · **Depends on:** 4
 
 **Files**
-- `src/pages/DayAheadPage.tsx`
-- `src/components/controls/DecisionControls.tsx`, `ActualsToggle.tsx`
-- `src/components/cards/KpiCard.tsx`
-- `src/components/charts/ForecastChart.tsx`, `ChartTooltip.tsx`
+- `src/pages/DayAheadPage.tsx`, `src/pages/pages.module.css`
+- `src/components/controls/DecisionControls.tsx` (+ `CutoffSelect`), `ActualsToggle.tsx`, `controls.module.css`
+- `src/components/cards/KpiCard.tsx` (+ CSS)
+- `src/components/charts/ForecastChart.tsx`, `ChartParts.tsx` (legend keys, tooltip box, table view, shared with
+  Task 6), `charts.module.css`
 - `src/test/DecisionControls.test.tsx`, `src/test/DayAheadPage.test.tsx`
 
 **Steps**
-- [ ] Controls:
-  - decision date (`<input type="date">` limited to Jan 1–31)
+- [x] Controls:
+  - decision date (`<input type="date">` limited to Jan 1–31; dates typed outside the range are ignored)
   - cutoff select: `07:00`, `08:00`, `09:00` (default), `09:20 (EPEX close)`, `09:50 (N2EX close)`, `11:00`, `12:00`
-- [ ] Info line: *"Using the forecast published 15 Jan 07:30 · delivery day Fri 16 Jan"*
-- [ ] Summary cards:
+- [x] Info line: *"Using the forecast published 27 Jan 07:30 for delivery on Wed 28 Jan"*
+- [x] Summary cards:
   - forecast energy (GWh)
   - peak / low forecast
   - hours ahead (e.g. 16.5–39.5 h)
-  - actual vs forecast (MAE + bias), shown only when actuals are on
-- [ ] `ForecastChart`:
-  - P10–P90 band (shaded area) + forecast (solid line) + actual (dashed line)
-  - x-axis in UK time, with a shared tooltip
-- [ ] **Show actuals** toggle: hides the actual line and its card, to show what the trader saw at the time
-- [ ] Notes for missing data: *"2 hours without a forecast at this cutoff"* (e.g. at 00:00) and missing actual
-      hours; an empty state when there's no forecast at all
+  - actual vs forecast, in plain English (*"Off by 5,375 MW on average · forecast 5,375 MW too high"*), shown only
+    when actuals are on
+- [x] `ForecastChart`:
+  - P10–P90 band (a 12% wash of the forecast blue, so gridlines show through) + forecast (solid line) + actual
+    (dashed line); legend; y-axis from 0 in GW
+  - x-axis in UK time, with a crosshair tooltip listing every series at that hour
+  - **table view** ("Show hourly table") with every value, so nothing depends on hovering
+- [x] **Show actuals** toggle: hides the actual line and its card, to show what the trader saw at the time
+- [x] Notes for missing data (forecast and actual hours); an empty state when there's no forecast at all
+- [x] Changing the date or cutoff keeps the previous view on screen, faded, until the new one arrives
+- [x] Extra: `formatPowerRange` so a range never mixes units (the screenshot showed "5,867 MW – 10.4 GW")
 
 **Tests**
-- [ ] `DecisionControls`: the date is limited to January; changing the cutoff calls `onChange`
-- [ ] `DayAheadPage` (faked API): shows the summary cards and the "Using the forecast published …" line; the
+- [x] `DecisionControls`: the date is limited to January; changing the cutoff calls `onChange`
+- [x] `DayAheadPage` (faked API): shows the summary cards and the "Using the forecast published …" line; the
       toggle hides the actual card; a 503 shows the error state
+- [x] Extra: missing-hours note · empty state · out-of-range date ignored · range formatting
 
 **Done when**
-- [ ] Standard checks pass
-- [ ] With real data: decision **Jan 27** shows forecast **267 GWh** vs actual **138 GWh**; cutoff 09:50 switches
-      to the **09:30** forecast; cutoff 00:00 shows the "2 hours without a forecast" note
-- [ ] Screenshots in the review (actuals on and off)
+- [x] Standard checks pass (54 tests)
+- [x] With real data: decision **Jan 27** shows forecast **267 GWh** vs actual **138 GWh** ✓; cutoff 09:50 switches
+      to the **09:30** forecast ✓. Changed: the "2 hours without a forecast" note only occurs at a 00:00
+      cutoff, which isn't a UI option (07:00 and later always use a forecast that covers the whole day), so it
+      is checked by a unit test instead
+- [x] Screenshots in the review (actuals on and off, tooltip, dark mode); no browser console errors
 
 **Review checklist**
 - Is the chart easy to read? Can the band, forecast and actual be told apart without colour (dashed line)?
@@ -351,3 +359,4 @@ Same as the backend:
 | 2 – Styles, colours, formats | 2026-10-24 | ✅ Approved | Validated palette (colour-blind ΔE 19–27, ≥ 3:1) in light and dark; dark mode included; formats with real minus sign and UK time (BST tested); separate test tsconfig; 23 tests |
 | 3 – API layer, URL state | 2026-10-24 | ✅ Approved | Types verified against the backend OpenAPI schema (77 fields, 12 models identical); readable `ApiError`s; never-stale cache, keep previous data, retry 5xx not 4xx; URL state with limits from `/api/meta`; 42 tests |
 | 4 – App shell | 2026-10-24 | ✅ Approved | Header with Live/Snapshot badge and visible fetch time; keyboard tabs kept in the URL; loading/error/empty states; screenshots caught an unhelpful 502 message and a CSS order bug (both fixed); 47 tests |
+| 5 – Day-ahead view | 2026-10-24 | ✅ Approved | Controls, info line, 4 cards, forecast/band/actual chart with crosshair tooltip and table view, actuals toggle; checked in Chrome via Playwright on real data (Jan 27: 267 vs 138 GWh; 09:50 → 09:30 forecast; no console errors); fixed mixed units in ranges; 54 tests |

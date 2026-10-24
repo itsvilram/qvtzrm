@@ -1,0 +1,23 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.label {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+/* Proportional figures for standalone values (tabular only where numbers line up in columns). */
+.value {
+  font-size: 1.5rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.detail {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}

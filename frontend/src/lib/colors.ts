@@ -9,12 +9,14 @@
 export const chartColors = {
   forecast: 'var(--series-forecast)',
   actual: 'var(--series-actual)',
-  band: 'var(--band)',
   underForecast: 'var(--under-forecast)',
   overForecast: 'var(--over-forecast)',
   grid: 'var(--grid)',
   axis: 'var(--axis)',
   label: 'var(--text-muted)',
 } as const
+
+/** Area fills are a light wash of the series colour, so gridlines stay visible through them. */
+export const AREA_OPACITY = 0.12
 
 export type ChartColor = keyof typeof chartColors

@@ -19,8 +19,6 @@
   /* Chart series: categorical slots 1–2 */
   --series-forecast: #2a78d6;
   --series-actual: #eb6834;
-  /* P10–P90 range around the forecast: light step of the forecast's blue */
-  --band: #cde2fb;
 
   /* Forecast error sign: diverging blue <-> red with a grey midpoint */
   --under-forecast: #2a78d6;
@@ -63,7 +61,6 @@
 
     --series-forecast: #3987e5;
     --series-actual: #d95926;
-    --band: #104281;
 
     --under-forecast: #3987e5;
     --over-forecast: #e66767;
