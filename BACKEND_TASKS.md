@@ -37,7 +37,7 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 | 5 | [Actuals: half-hourly → hourly](#task-5--actuals-half-hourly--hourly) | 15 min | ✅ |
 | 6 | [Decision-time forecast selection](#task-6--decision-time-forecast-selection) | 30 min | ✅ |
 | 7 | [Error metrics](#task-7--error-metrics) | 30 min | ✅ |
-| 8 | [DataStore (loading + cache)](#task-8--datastore-loading--cache) | 20 min | ⬜ |
+| 8 | [DataStore (loading + cache)](#task-8--datastore-loading--cache) | 20 min | ✅ |
 | 9 | [API endpoints](#task-9--api-endpoints) | 35 min | ⬜ |
 | 10 | [Check results against real data](#task-10--check-results-against-real-data) | 15 min | ⬜ |
 | 11 | [Dockerfile](#task-11--dockerfile) | 15 min | ⬜ |
@@ -252,27 +252,32 @@ buffer 4.1 GW; 81% of actuals inside the P10–P90 band
 ---
 
 ## Task 8 – DataStore (loading + cache)
-**Status:** ⬜ · **Depends on:** 3, 4, 5, 6, 7
+**Status:** ✅ Done · **Depends on:** 3, 4, 5, 6, 7
 
-**Files:** `backend/app/store.py`, `backend/tests/test_store.py`
+**Files:** `backend/app/store.py`, `backend/tests/test_store.py`, `backend/tests/samples.py` (shared sample data),
+`backend/tests/conftest.py` (`snapshot` fixture)
 
 **Steps**
-- [ ] `DataStore(source="auto"|"live"|"snapshot", client=None)`
-- [ ] Loads on first use and only once (protected by `threading.Lock`)
-- [ ] `auto` mode: try live; if that fails, log a warning and use the snapshot
-- [ ] Exposes `actuals_hourly`, `forecasts`, `source`, `loaded_at`
-- [ ] `analysis(cutoff)`: selection + join, cached per cutoff (`lru_cache`)
-- [ ] `horizon_stats()`: `metrics.by_horizon` worked out once and cached (it doesn't depend on the cutoff)
-- [ ] `get_store()` returns one shared store for the FastAPI app
-- [ ] Raises `DataUnavailableError` if no source works
+- [x] `DataStore(source, client_factory, snapshot_loader)`. The data sources can be swapped in tests.
+- [x] Loads on first use and only once (protected by `threading.Lock`)
+- [x] `auto` mode: try live; if that fails (or returns no data), log a warning and use the snapshot
+- [x] Exposes `dataset` → `actuals_hourly`, `forecasts`, `source`, `fetched_at` (renamed from `loaded_at`:
+      it's when the data was fetched from Elexon, which for a snapshot is the snapshot date)
+- [x] `analysis(cutoff)`: selection + join, cached per cutoff (`lru_cache`)
+- [x] `horizon_stats()`: `metrics.by_horizon` worked out once and cached (it doesn't depend on the cutoff)
+- [x] `get_store()` returns one shared store for the FastAPI app
+- [x] Raises `DataUnavailableError` if no source works
 
 **Tests** (using a fake client)
-- [ ] `auto` with live failing → uses the snapshot, `source == "snapshot"`
-- [ ] Loads only once across repeated calls
-- [ ] `analysis(cutoff)` is cached (second call returns the same object)
-- [ ] Both sources failing → `DataUnavailableError`
+- [x] `auto` with live failing → uses the snapshot, `source == "snapshot"`
+- [x] Loads only once across repeated calls
+- [x] `analysis(cutoff)` is cached (second call returns the same object)
+- [x] Both sources failing → `DataUnavailableError`
+- [x] Extra: live mode doesn't fall back · snapshot mode never calls Elexon · empty live data falls back ·
+      8 simultaneous requests load only once · a failed load is retried on the next request
 
-**Done when:** tests pass and ruff passes
+**Done when:** tests pass and ruff passes ✓ (66 tests). Real data: live load 3.4 s; Elexon unreachable →
+snapshot in 1.4 s; snapshot mode 0.13 s; analysis 72 ms first time, then 0 ms (cached)
 
 **Review checklist**
 - Is it safe when two requests arrive at once? Is the fallback logged? Is the cache size limited?
@@ -363,3 +368,4 @@ buffer 4.1 GW; 81% of actuals inside the P10–P90 band
 | 5 – Hourly actuals | 2026-10-24 | ✅ Approved | Average of the two half-hours; incomplete hours dropped with a warning; 5 tests; real data 1,488 → 744 hours, none dropped |
 | 6 – Forecast selection ⭐ | 2026-10-24 | ✅ Approved | 11 tests; real data at 09:00 = 744 h, all from the 07:30 forecast, 16.5–39.5 h ahead; row-by-row check 0 mismatches at 4 cutoffs; found that a 00:00 cutoff leaves 22:00–23:00 without a forecast (Task 9 must report the missing hours) |
 | 7 – Error metrics | 2026-10-24 | ✅ Approved (option A) | 13 tests; `by_horizon` changed to use all forecasts (MAE 1.69 GW at 0–6 h → 2.33 GW at 42–48 h); real data at 09:00: MAE 2.04 GW, bias +1.75 GW, buffer 4.1 GW; bias grows with wind level (likely curtailment, not confirmed) |
+| 8 – DataStore | 2026-10-24 | ✅ Approved | Loads once (lock, tested with 8 simultaneous requests); `auto` falls back to the snapshot (simulated Elexon outage tested); `analysis` and `horizon_stats` cached; `loaded_at` renamed `fetched_at`; 10 tests |
