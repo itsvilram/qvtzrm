@@ -37,7 +37,7 @@ Same as the backend:
 |---|---|---|---|
 | 1 | [Project setup](#task-1--project-setup) | 15 min | ✅ |
 | 2 | [Styles, colours and number formats](#task-2--styles-colours-and-number-formats) | 15 min | ✅ |
-| 3 | [API layer and URL state](#task-3--api-layer-and-url-state) | 20 min | ⬜ |
+| 3 | [API layer and URL state](#task-3--api-layer-and-url-state) | 20 min | ✅ |
 | 4 | [App shell (header, tabs, loading/error states)](#task-4--app-shell) | 15 min | ⬜ |
 | 5 | [Day-ahead view](#task-5--day-ahead-view) | 40 min | ⬜ |
 | 6 | [Forecast accuracy view](#task-6--forecast-accuracy-view) | 45 min | ⬜ |
@@ -114,32 +114,41 @@ Same as the backend:
 ---
 
 ## Task 3 – API layer and URL state
-**Status:** ⬜ · **Depends on:** 1
+**Status:** ✅ Done · **Depends on:** 1
 
 **Files**
-- `src/api/types.ts`, `src/api/client.ts`, `src/api/hooks.ts`
+- `src/api/types.ts`, `src/api/client.ts`, `src/api/hooks.ts`, `src/env.d.ts` (type for `VITE_API_BASE_URL`)
 - `src/state/useUrlState.ts`
 - `src/test/client.test.ts`, `src/test/useUrlState.test.ts`
 
 **Steps**
-- [ ] `types.ts`: exactly the types in FRONTEND_PLAN §5, which mirror `backend/app/schemas.py`
-- [ ] `client.ts`:
+- [x] `types.ts`: exactly the types in FRONTEND_PLAN §5, which mirror `backend/app/schemas.py`
+      → **checked automatically against the backend's OpenAPI schema: 77 fields in 12 models, names and
+      nullability identical**
+- [x] `client.ts`:
   - `getJson<T>(path, params)`; base URL from `VITE_API_BASE_URL`, defaulting to the same address
   - `ApiError(status, message)`, which reads `detail` whether it's a string or FastAPI's list of `{ msg }`
+    (status 0 = server unreachable)
   - `getMeta()`, `getDayAhead(date, cutoff)`, `getAccuracy(cutoff)`
-- [ ] `hooks.ts`:
-  - `useMeta` (never stale)
-  - `useDayAhead` and `useAccuracy` (kept 10 min; the previous data stays on screen while new data loads)
+- [x] `hooks.ts`:
+  - `useMeta`, `useDayAhead`, `useAccuracy`. All results never go stale (January's data doesn't change);
+    unused results are dropped after 10 min; the previous data stays on screen while new data loads
   - no refetch when the browser window regains focus
-- [ ] `useUrlState`:
+  - retries network/5xx errors up to 2 times, never 4xx (`shouldRetry`, same rule as the backend client)
+  - `createQueryClient()` with these defaults, used by the app in Task 4
+- [x] `useUrlState`:
   - keeps `tab`, `date` and `cutoff` in the URL using `history.replaceState`
   - bad values fall back to the defaults (day-ahead tab, 2026-01-31, 09:00)
+  - changed: the allowed dates and default cutoff are **passed in from `/api/meta`** instead of being
+    hard-coded, so the backend stays the single source of truth
 
 **Tests**
-- [ ] `ApiError` message from a string `detail`, from a list `detail`, and on a network failure
-- [ ] `useUrlState` reads valid values, falls back on invalid ones, and updates the URL when they change
+- [x] `ApiError` message from a string `detail`, from a list `detail`, and on a network failure
+- [x] `useUrlState` reads valid values, falls back on invalid ones, and updates the URL when they change
+- [x] Extra: URLs built correctly · non-JSON error body · retry policy · impossible dates rejected ·
+      no browser-history entries added
 
-**Done when:** standard checks pass
+**Done when:** standard checks pass ✓ (42 tests)
 
 **Review checklist**
 - Do the types match `schemas.py` field for field (including which fields can be `null`)?
@@ -335,3 +344,4 @@ Same as the backend:
 |---|---|---|---|
 | 1 – Project setup | 2026-10-24 | ✅ Approved | Vite 8 + React 19 + TS 6, exact versions, 0 vulnerabilities; oxlint (template default) with `--deny-warnings`; Prettier; Vitest + Testing Library; Vite proxy to the backend verified |
 | 2 – Styles, colours, formats | 2026-10-24 | ✅ Approved | Validated palette (colour-blind ΔE 19–27, ≥ 3:1) in light and dark; dark mode included; formats with real minus sign and UK time (BST tested); separate test tsconfig; 23 tests |
+| 3 – API layer, URL state | 2026-10-24 | ✅ Approved | Types verified against the backend OpenAPI schema (77 fields, 12 models identical); readable `ApiError`s; never-stale cache, keep previous data, retry 5xx not 4xx; URL state with limits from `/api/meta`; 42 tests |
