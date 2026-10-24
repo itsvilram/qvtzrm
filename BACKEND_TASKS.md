@@ -33,7 +33,7 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 | 1 | [Project setup](#task-1--project-setup) | 15 min | ✅ |
 | 2 | [Configuration](#task-2--configuration) | 10 min | ✅ |
 | 3 | [Elexon API client](#task-3--elexon-api-client) | 25 min | ✅ |
-| 4 | [Snapshot (backup data)](#task-4--snapshot-backup-data) | 10 min | ⬜ |
+| 4 | [Snapshot (backup data)](#task-4--snapshot-backup-data) | 10 min | ✅ |
 | 5 | [Actuals: half-hourly → hourly](#task-5--actuals-half-hourly--hourly) | 15 min | ⬜ |
 | 6 | [Decision-time forecast selection](#task-6--decision-time-forecast-selection) | 30 min | ⬜ |
 | 7 | [Error metrics](#task-7--error-metrics) | 30 min | ⬜ |
@@ -135,21 +135,21 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 ---
 
 ## Task 4 – Snapshot (backup data)
-**Status:** ⬜ · **Depends on:** 3
+**Status:** ✅ Done · **Depends on:** 3
 
 **Files**
-- `backend/app/snapshot.py`
+- `backend/app/snapshot.py`, `backend/tests/test_snapshot.py`
 - `backend/data/fuelhh_wind.json.gz`, `backend/data/windfor.json.gz`
 
 **Steps**
-- [ ] `python -m app.snapshot` fetches both datasets using the config ranges and writes gzipped JSON
-- [ ] `load_snapshot() -> (actuals_df, forecasts_df)` reads them back with the same columns and types
-- [ ] Prints a summary: rows, date ranges, file sizes
+- [x] `python -m app.snapshot` fetches both datasets using the config ranges and writes gzipped JSON
+- [x] `load_snapshot()` reads them back with the same columns and types (returns `Snapshot(actuals, forecasts, fetched_at)`)
+- [x] Prints a summary: rows, date ranges, file sizes
 
 **Done when**
-- [ ] Both files exist, together about 300 KB or less
-- [ ] Loading the snapshot gives the same row counts as the live fetch
-- [ ] A test checks that saving and loading returns an identical DataFrame (a temp file is fine)
+- [x] Both files exist, together about 300 KB or less → **100 KB** (8 KB + 92 KB)
+- [x] Loading the snapshot gives the same row counts as the live fetch → frames are **identical** (`assert_frame_equal`)
+- [x] A test checks that saving and loading returns an identical DataFrame (a temp file is fine) → 3 tests, 27 in total
 
 **Review checklist**
 - Small enough to commit? Is the format readable (JSON, not pickle)?
@@ -350,3 +350,4 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 | 1 – Project setup | 2026-10-24 | ✅ Approved | Pinned versions; ruff + pytest set up; assignment `.docx` kept out of git; commits use the personal identity `itsvilram`, set for this repo only |
 | 2 – Configuration | 2026-10-24 | ✅ Approved | Settings in one place with env overrides; strict `HH:MM` cutoff; bad `DATA_SOURCE` stops startup; 16 tests; added `.gitattributes` (Unix line endings) and `ruff format` |
 | 3 – Elexon API client | 2026-10-24 | ✅ Approved | Clean UTC tables; retries network/5xx errors but not 4xx; 8 tests with a fake server; real API: 1,488 actual rows, 18,688 forecast rows (256 forecasts) |
+| 4 – Snapshot | 2026-10-24 | ✅ Approved | Gzipped JSON, 100 KB total; identical to a fresh live fetch; same data gives a byte-identical file; 3 tests |
