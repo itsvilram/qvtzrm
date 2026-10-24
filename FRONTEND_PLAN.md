@@ -15,13 +15,13 @@ tomorrow, so they need to see quickly:
 | Purpose | Choice | Why |
 |---|---|---|
 | Build tool | Vite | Fast dev server; its proxy forwards `/api` to the backend, so no CORS setup is needed |
-| UI | React 18 + TypeScript | Required by the brief; types match the backend's response models |
+| UI | React 19 + TypeScript 6 | Required by the brief; types match the backend's response models |
 | Charts | Recharts | React-friendly; can draw lines, bars and range bands; resizes automatically |
 | Data fetching | TanStack Query | Built-in loading/error states and caching, so switching dates back and forth is instant |
 | Styling | Plain CSS with variables + CSS Modules | No extra tooling; easy to explain |
 | Date/number formatting | Built-in `Intl` (`timeZone: "Europe/London"`) | No extra library |
 | Testing | Vitest + React Testing Library | Same setup as Vite; fast |
-| Lint/format | ESLint + Prettier | Standard |
+| Lint/format | oxlint + Prettier | oxlint is the Vite template's current default (fast, ESLint-compatible rules); warnings fail the check |
 
 **Node:** 24 (installed locally); the same version is used in the Docker build stage.
 
@@ -319,7 +319,7 @@ npm run dev            # http://localhost:5173 (the Vite proxy forwards /api →
 
 | # | Task | Time | Done |
 |---|---|---|---|
-| 1 | Create the Vite React-TS project, add dependencies, ESLint/Prettier, Vite proxy | 10 min | ☐ |
+| 1 | Create the Vite React-TS project, add dependencies, oxlint/Prettier, Vite proxy | 10 min | ☐ |
 | 2 | `global.css`, colours, `format.ts` + tests | 15 min | ☐ |
 | 3 | `api/types.ts`, `client.ts`, `hooks.ts`, `useUrlState` | 15 min | ☐ |
 | 4 | Header, Tabs, DataSourceBadge, loading/error/empty states | 15 min | ☐ |

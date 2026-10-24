@@ -35,7 +35,7 @@ Same as the backend:
 
 | # | Task | Time | Status |
 |---|---|---|---|
-| 1 | [Project setup](#task-1--project-setup) | 15 min | ⬜ |
+| 1 | [Project setup](#task-1--project-setup) | 15 min | ✅ |
 | 2 | [Styles, colours and number formats](#task-2--styles-colours-and-number-formats) | 15 min | ⬜ |
 | 3 | [API layer and URL state](#task-3--api-layer-and-url-state) | 20 min | ⬜ |
 | 4 | [App shell (header, tabs, loading/error states)](#task-4--app-shell) | 15 min | ⬜ |
@@ -52,27 +52,31 @@ Same as the backend:
 ---
 
 ## Task 1 – Project setup
-**Status:** ⬜ · **Depends on:** backend done
+**Status:** ✅ Done · **Depends on:** backend done
 
 **Files**
-- `frontend/` (from the Vite `react-ts` template): `package.json`, `vite.config.ts`, `tsconfig*.json`,
-  `eslint.config.js`, `index.html`, `src/main.tsx`, `src/App.tsx`
-- `frontend/.prettierrc`, `frontend/src/test/setup.ts`, `frontend/src/App.test.tsx`
+- `frontend/` (from the Vite `react-ts` template, create-vite 9.3): `package.json`, `package-lock.json`,
+  `vite.config.ts`, `tsconfig*.json`, `.oxlintrc.json`, `index.html`, `src/main.tsx`, `src/App.tsx`
+- `frontend/.npmrc` (`save-exact=true`), `.prettierrc.json`, `.prettierignore`
+- `frontend/src/test/setup.ts`, `frontend/src/test/App.test.tsx` (all tests live in `src/test/`)
 
 **Steps**
-- [ ] Create the project with `npm create vite@latest frontend -- --template react-ts`, then delete the demo
-      content (logos, counter, demo CSS)
-- [ ] Add dependencies: `recharts`, `@tanstack/react-query`
-- [ ] Add dev dependencies: `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/jest-dom`,
+- [x] Create the project with `npm create vite@latest frontend -- --template react-ts`, then delete the demo
+      content (logos, counter, demo CSS, template README)
+- [x] Add dependencies: `recharts`, `@tanstack/react-query`
+- [x] Add dev dependencies: `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/jest-dom`,
       `@testing-library/user-event`, `prettier`
-- [ ] **Pin exact versions** (`save-exact`), as in the backend
-- [ ] `package.json` scripts: `dev`, `build`, `preview`, `lint`, `test`, `format`, `format:check`
-- [ ] `vite.config.ts`: dev proxy `/api` → `http://localhost:8000`, plus Vitest settings (jsdom, setup file)
-- [ ] Placeholder `App` ("Wind Forecast Monitor") and one smoke test
+- [x] **Pin exact versions** (`save-exact`), as in the backend (the template's own `^`/`~` ranges too)
+- [x] `package.json` scripts: `dev`, `build`, `preview`, `lint`, `test`, `test:watch`, `format`, `format:check`
+- [x] `vite.config.ts`: dev proxy `/api` → `http://localhost:8000`, plus Vitest settings (jsdom, setup file)
+- [x] Placeholder `App` ("Wind Forecast Monitor") and one smoke test
+- [x] Changed: the template now uses **oxlint** instead of ESLint; kept it, and made warnings fail the check
+      (`--deny-warnings`)
 
 **Done when**
-- [ ] `npm run dev` serves the page, and `/api/health` **through the Vite proxy** returns `{"status":"ok"}`
-- [ ] `npm run build`, `npm run lint`, `npm run format:check` and `npm test` all pass
+- [x] `npm run dev` serves the page, and `/api/health` **through the Vite proxy** returns `{"status":"ok"}`
+      (`/api/meta` too, with real data)
+- [x] `npm run build`, `npm run lint`, `npm run format:check` and `npm test` all pass
 
 **Review checklist**
 - Versions pinned? Nothing unnecessary added? No demo files left over?
@@ -326,4 +330,4 @@ Same as the backend:
 
 | Task | Date | Result | Notes |
 |---|---|---|---|
-| | | | |
+| 1 – Project setup | 2026-10-24 | ✅ Approved | Vite 8 + React 19 + TS 6, exact versions, 0 vulnerabilities; oxlint (template default) with `--deny-warnings`; Prettier; Vitest + Testing Library; Vite proxy to the backend verified |
