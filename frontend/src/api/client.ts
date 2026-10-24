@@ -40,7 +40,11 @@ async function errorMessage(response: Response): Promise<string> {
       if (text) return text
     }
   } catch {
-    // Not JSON: fall through to the generic message.
+    // Not JSON: fall through to the generic messages.
+  }
+  // A proxy (Vite in development, Nginx in Docker) answers 502–504 when the backend is down.
+  if (response.status >= 502 && response.status <= 504) {
+    return `The data service isn't responding (HTTP ${response.status}). Please try again in a moment.`
   }
   return `Request failed (HTTP ${response.status})`
 }

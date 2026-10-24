@@ -1,9 +1,68 @@
+import { useMemo } from 'react'
+import { useMeta } from './api/hooks.ts'
+import type { Meta } from './api/types.ts'
+import styles from './App.module.css'
+import { ErrorState } from './components/feedback/ErrorState.tsx'
+import { LoadingState } from './components/feedback/LoadingState.tsx'
+import { Footer } from './components/layout/Footer.tsx'
+import { Header } from './components/layout/Header.tsx'
+import { TabPanel, Tabs } from './components/layout/Tabs.tsx'
+import { CUTOFF_VALUES } from './lib/cutoffs.ts'
+import { AccuracyPage } from './pages/AccuracyPage.tsx'
+import { DayAheadPage } from './pages/DayAheadPage.tsx'
+import { type UrlLimits, useUrlState } from './state/useUrlState.ts'
+
 function App() {
+  const meta = useMeta()
+
   return (
-    <main>
-      <h1>Wind Forecast Monitor</h1>
-      <p>GB national wind · January 2026</p>
-    </main>
+    <div className={styles.app}>
+      <Header meta={meta.data} />
+      {meta.isSuccess ? (
+        <Dashboard meta={meta.data} />
+      ) : (
+        <main className="container">
+          {/* After Retry the query is still in error while it refetches, so show loading then. */}
+          {meta.isError && !meta.isFetching ? (
+            <ErrorState message={meta.error.message} onRetry={() => void meta.refetch()} />
+          ) : (
+            <LoadingState />
+          )}
+        </main>
+      )}
+      <Footer />
+    </div>
+  )
+}
+
+/** Rendered once /api/meta has loaded, because the valid dates and cutoff come from it. */
+function Dashboard({ meta }: { meta: Meta }) {
+  const limits = useMemo<UrlLimits>(
+    () => ({
+      minDate: meta.decision_date_min,
+      maxDate: meta.decision_date_max,
+      defaultCutoff: meta.default_cutoff,
+      cutoffs: CUTOFF_VALUES,
+    }),
+    [meta],
+  )
+  const [state, update] = useUrlState(limits)
+
+  return (
+    <>
+      <div className="container">
+        <Tabs active={state.tab} onChange={(tab) => update({ tab })} />
+      </div>
+      <main className="container">
+        <TabPanel tab={state.tab}>
+          {state.tab === 'day-ahead' ? (
+            <DayAheadPage date={state.date} cutoff={state.cutoff} />
+          ) : (
+            <AccuracyPage cutoff={state.cutoff} />
+          )}
+        </TabPanel>
+      </main>
+    </>
   )
 }
 

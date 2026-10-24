@@ -71,13 +71,24 @@ describe('API client', () => {
     expect(error.message).toBe('Input should be a valid date; Field required')
   })
 
-  it('falls back to a generic message when the body is not JSON', async () => {
+  it('explains a gateway error when the backend is down', async () => {
     mockFetch(() => new Response('Bad Gateway', { status: 502 }))
 
     const error = await failure(getMeta())
 
     expect(error.status).toBe(502)
-    expect(error.message).toBe('Request failed (HTTP 502)')
+    expect(error.message).toBe(
+      "The data service isn't responding (HTTP 502). Please try again in a moment.",
+    )
+  })
+
+  it('falls back to a generic message when the body is not JSON', async () => {
+    mockFetch(() => new Response('Internal Server Error', { status: 500 }))
+
+    const error = await failure(getMeta())
+
+    expect(error.status).toBe(500)
+    expect(error.message).toBe('Request failed (HTTP 500)')
   })
 
   it('reports a network failure with status 0', async () => {

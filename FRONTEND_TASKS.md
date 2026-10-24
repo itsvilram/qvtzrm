@@ -38,7 +38,7 @@ Same as the backend:
 | 1 | [Project setup](#task-1--project-setup) | 15 min | ✅ |
 | 2 | [Styles, colours and number formats](#task-2--styles-colours-and-number-formats) | 15 min | ✅ |
 | 3 | [API layer and URL state](#task-3--api-layer-and-url-state) | 20 min | ✅ |
-| 4 | [App shell (header, tabs, loading/error states)](#task-4--app-shell) | 15 min | ⬜ |
+| 4 | [App shell (header, tabs, loading/error states)](#task-4--app-shell) | 15 min | ✅ |
 | 5 | [Day-ahead view](#task-5--day-ahead-view) | 40 min | ⬜ |
 | 6 | [Forecast accuracy view](#task-6--forecast-accuracy-view) | 45 min | ⬜ |
 | 7 | [Responsive layout, accessibility, polish](#task-7--responsive-layout-accessibility-polish) | 15 min | ⬜ |
@@ -157,32 +157,37 @@ Same as the backend:
 ---
 
 ## Task 4 – App shell
-**Status:** ⬜ · **Depends on:** 2, 3
+**Status:** ✅ Done · **Depends on:** 2, 3
 
 **Files**
-- `src/main.tsx`, `src/App.tsx`
-- `src/components/layout/Header.tsx`, `Tabs.tsx`, `DataSourceBadge.tsx`
-- `src/components/feedback/LoadingState.tsx`, `ErrorState.tsx`, `EmptyState.tsx`
-- `src/test/App.test.tsx`
+- `src/main.tsx`, `src/App.tsx` (+ `App.module.css`), `src/lib/cutoffs.ts` (the cutoff options)
+- `src/components/layout/Header.tsx`, `Tabs.tsx` (+ `TabPanel`), `DataSourceBadge.tsx`, `Footer.tsx` (+ CSS Modules)
+- `src/components/feedback/LoadingState.tsx`, `ErrorState.tsx`, `EmptyState.tsx` (+ `feedback.module.css`)
+- `src/pages/DayAheadPage.tsx`, `AccuracyPage.tsx`: placeholders, replaced in Tasks 5 and 6
+- `src/test/App.test.tsx`, `src/test/render.tsx` (fake API + render helper), `src/test/fixtures.ts`
 
 **Steps**
-- [ ] `QueryClientProvider` in `main.tsx`
-- [ ] Header:
-  - title and scope line ("GB national wind · January 2026")
-  - **data source badge** (`Live` / `Snapshot`), with the `fetched_at` date shown on hover
-- [ ] Tabs: "Day-ahead view" / "Forecast accuracy" with ARIA tab roles and arrow-key navigation; the active tab
-      is kept in the URL
-- [ ] Loading state (grey blocks shaped like the content), error state (message + **Retry** button), empty state
+- [x] `QueryClientProvider` in `main.tsx`
+- [x] Header:
+  - title and scope line ("GB national wind · day-ahead decisions for January 2026")
+  - **data source badge** (`Live data` / `Saved snapshot`). Changed: the `fetched_at` time is shown as
+    visible text next to it, not on hover, so it also works on touch screens and with the keyboard
+- [x] Tabs: "Day-ahead view" / "Forecast accuracy" with ARIA tab roles and arrow-key navigation (plus Home/End);
+      the active tab is kept in the URL
+- [x] Loading state (grey blocks shaped like the content, no animation if the user prefers reduced motion),
+      error state (message + **Retry** button; shows loading while retrying), empty state
+- [x] Extra: footer naming the data source; clearer message when the backend is down (502–504)
 
 **Tests**
-- [ ] The app renders the header and badge from a faked `/api/meta`
-- [ ] Switching tabs updates the URL
-- [ ] A 503 shows the error state, and Retry calls the API again
+- [x] The app renders the header and badge from a faked `/api/meta` (incl. the fetched time in UK summer time)
+- [x] Switching tabs updates the URL
+- [x] A 503 shows the error state, and Retry calls the API again
+- [x] Extra: snapshot badge · arrow keys move between tabs
 
 **Done when**
-- [ ] Standard checks pass
-- [ ] Against the real backend: the badge shows **Live**; with the backend stopped, the error state and Retry work
-- [ ] Screenshot in the review
+- [x] Standard checks pass (47 tests)
+- [x] Against the real backend: the badge shows **Live**; with the backend stopped, the error state and Retry work
+- [x] Screenshots in the review (light, dark, error, and a shared link opening the accuracy tab)
 
 **Review checklist**
 - Do the tabs work with the keyboard? Does the page avoid jumping around while data loads?
@@ -345,3 +350,4 @@ Same as the backend:
 | 1 – Project setup | 2026-10-24 | ✅ Approved | Vite 8 + React 19 + TS 6, exact versions, 0 vulnerabilities; oxlint (template default) with `--deny-warnings`; Prettier; Vitest + Testing Library; Vite proxy to the backend verified |
 | 2 – Styles, colours, formats | 2026-10-24 | ✅ Approved | Validated palette (colour-blind ΔE 19–27, ≥ 3:1) in light and dark; dark mode included; formats with real minus sign and UK time (BST tested); separate test tsconfig; 23 tests |
 | 3 – API layer, URL state | 2026-10-24 | ✅ Approved | Types verified against the backend OpenAPI schema (77 fields, 12 models identical); readable `ApiError`s; never-stale cache, keep previous data, retry 5xx not 4xx; URL state with limits from `/api/meta`; 42 tests |
+| 4 – App shell | 2026-10-24 | ✅ Approved | Header with Live/Snapshot badge and visible fetch time; keyboard tabs kept in the URL; loading/error/empty states; screenshots caught an unhelpful 502 message and a CSS order bug (both fixed); 47 tests |

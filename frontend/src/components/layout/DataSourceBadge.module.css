@@ -1,0 +1,35 @@
+.badge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.8125rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.live .dot {
+  background: var(--status-good);
+}
+
+.snapshot .dot {
+  background: var(--text-muted);
+}
+
+.detail {
+  color: var(--text-muted);
+}

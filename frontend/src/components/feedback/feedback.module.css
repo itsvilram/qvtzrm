@@ -1,0 +1,68 @@
+/* Loading placeholders */
+.loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.block {
+  border-radius: var(--radius);
+  background: var(--grid);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.kpiBlock {
+  height: 88px;
+}
+
+.chartBlock {
+  height: 380px;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block {
+    animation: none;
+  }
+}
+
+/* Error and empty messages */
+.message {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.error {
+  border-left: 4px solid var(--status-critical);
+}
+
+.icon {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: var(--text-secondary);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.error .icon {
+  stroke: var(--status-critical);
+}
+
+.text {
+  flex: 1;
+  min-width: 200px;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 650;
+}
