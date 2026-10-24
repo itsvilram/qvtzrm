@@ -32,7 +32,7 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 |---|---|---|---|
 | 1 | [Project setup](#task-1--project-setup) | 15 min | ✅ |
 | 2 | [Configuration](#task-2--configuration) | 10 min | ✅ |
-| 3 | [Elexon API client](#task-3--elexon-api-client) | 25 min | ⬜ |
+| 3 | [Elexon API client](#task-3--elexon-api-client) | 25 min | ✅ |
 | 4 | [Snapshot (backup data)](#task-4--snapshot-backup-data) | 10 min | ⬜ |
 | 5 | [Actuals: half-hourly → hourly](#task-5--actuals-half-hourly--hourly) | 15 min | ⬜ |
 | 6 | [Decision-time forecast selection](#task-6--decision-time-forecast-selection) | 30 min | ⬜ |
@@ -102,29 +102,31 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 ---
 
 ## Task 3 – Elexon API client
-**Status:** ⬜ · **Depends on:** 2
+**Status:** ✅ Done · **Depends on:** 2
 
 **Files:** `backend/app/elexon.py`, `backend/tests/test_elexon.py`
 
 **Steps**
-- [ ] `ElexonClient(base_url, timeout, retries, transport=None)`. The `transport` parameter lets tests swap in
+- [x] `ElexonClient(base_url, timeout, retries, transport=None)`. The `transport` parameter lets tests swap in
       a fake.
-- [ ] `fetch_wind_actuals(from_date, to_date) -> DataFrame[start_time, generation_mw]`
+- [x] `fetch_wind_actuals(from_date, to_date) -> DataFrame[start_time, generation_mw]`
   - FUELHH stream with `fuelType=WIND`, plus a client-side WIND filter as an extra safeguard
-- [ ] `fetch_wind_forecasts(publish_from, publish_to) -> DataFrame[publish_time, start_time, generation_mw]`
-- [ ] All times parsed as UTC (`pd.to_datetime(..., utc=True)`)
-- [ ] Retry with back-off on network errors and 5xx responses; after the final retry, raise `ElexonError`
+- [x] `fetch_wind_forecasts(publish_from, publish_to) -> DataFrame[publish_time, start_time, generation_mw]`
+- [x] All times parsed as UTC (`pd.to_datetime(..., utc=True)`)
+- [x] Retry with back-off on network errors and 5xx responses; after the final retry, raise `ElexonError`
 
 **Tests** (using `httpx.MockTransport`)
-- [ ] Parses fields and UTC times correctly
-- [ ] Drops rows that aren't WIND
-- [ ] Retries on a 5xx response and succeeds on the next attempt
-- [ ] Raises `ElexonError` after all retries fail
-- [ ] An empty response gives an empty DataFrame with the correct columns
+- [x] Parses fields and UTC times correctly
+- [x] Drops rows that aren't WIND
+- [x] Retries on a 5xx response and succeeds on the next attempt (plus a network error case)
+- [x] Raises `ElexonError` after all retries fail
+- [x] An empty response gives an empty DataFrame with the correct columns
+- [x] Extra: 4xx is not retried; an unexpected JSON shape raises `ElexonError`
 
 **Done when**
-- [ ] `pytest tests/test_elexon.py` passes and ruff passes
-- [ ] A quick manual call against the real API returns 1,488 actual rows and about 18,688 forecast rows
+- [x] `pytest tests/test_elexon.py` passes and ruff passes (24 tests in total)
+- [x] A quick manual call against the real API returns 1,488 actual rows and about 18,688 forecast rows
+      → exactly 1,488 and 18,688 (256 forecasts), in about 1.5 s each
 
 **Review checklist**
 - Are timeouts set? Are 4xx errors **not** retried?
@@ -347,3 +349,4 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 |---|---|---|---|
 | 1 – Project setup | 2026-10-24 | ✅ Approved | Pinned versions; ruff + pytest set up; assignment `.docx` kept out of git; commits use the personal identity `itsvilram`, set for this repo only |
 | 2 – Configuration | 2026-10-24 | ✅ Approved | Settings in one place with env overrides; strict `HH:MM` cutoff; bad `DATA_SOURCE` stops startup; 16 tests; added `.gitattributes` (Unix line endings) and `ruff format` |
+| 3 – Elexon API client | 2026-10-24 | ✅ Approved | Clean UTC tables; retries network/5xx errors but not 4xx; 8 tests with a fake server; real API: 1,488 actual rows, 18,688 forecast rows (256 forecasts) |
