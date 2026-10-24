@@ -39,7 +39,7 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 | 7 | [Error metrics](#task-7--error-metrics) | 30 min | ✅ |
 | 8 | [DataStore (loading + cache)](#task-8--datastore-loading--cache) | 20 min | ✅ |
 | 9 | [API endpoints](#task-9--api-endpoints) | 35 min | ✅ |
-| 10 | [Check results against real data](#task-10--check-results-against-real-data) | 15 min | ⬜ |
+| 10 | [Check results against real data](#task-10--check-results-against-real-data) | 15 min | ✅ |
 | 11 | [Dockerfile](#task-11--dockerfile) | 15 min | ⬜ |
 | | **Total** | **~3 h 40 min** (including reviews) | |
 
@@ -324,17 +324,36 @@ snapshot in 1.4 s; snapshot mode 0.13 s; analysis 72 ms first time, then 0 ms (c
 ---
 
 ## Task 10 – Check results against real data
-**Status:** ⬜ · **Depends on:** 9
+**Status:** ✅ Done · **Depends on:** 9
+
+**Files:** `backend/scripts/spot_check.py`. Re-run any time with `python -m scripts.spot_check` (from `backend/`).
 
 **Steps**
-- [ ] Call `/api/accuracy` and `/api/day-ahead` for 3 different dates
-- [ ] Spot-check 3 hours by hand against the raw Elexon responses (forecast value, publish time, actual average)
-- [ ] Check the numbers make sense: wind 2–21 GW, MAE likely about 0.5–2 GW, the band contains most actuals
-- [ ] Note the real headline numbers (MAE, bias, buffer) for the video
+- [x] Call `/api/accuracy` and `/api/day-ahead` for 3 different dates
+- [x] Spot-check 3 hours by hand against the raw Elexon responses (forecast value, publish time, actual average)
+      → done with a script that uses plain Python on the raw JSON (none of the app's data code)
+- [x] Check the numbers make sense: wind 2–21 GW, MAE likely about 0.5–2 GW, the band contains most actuals
+      → forecast 3.2–21.1 GW, actual 1.7–17.8 GW ✓ · MAE 2.04 GW, just above the guess because of the
+      +1.75 GW bias (85% of hours over-forecast) ✓ · 81% of actuals inside the P10–P90 band ✓
+- [x] Note the real headline numbers (MAE, bias, buffer) for the video → see below
 
 **Done when**
-- [ ] The spot-checks match exactly
-- [ ] The headline numbers are recorded in the review log
+- [x] The spot-checks match exactly → 3/3 exact (Jan 2 00:00, Jan 16 12:00, Jan 28 23:00)
+- [x] The headline numbers are recorded in the review log
+
+### Headline numbers for the video (cutoff 09:00 UK, delivery 2 Jan – 1 Feb 2026, 744 hours)
+
+| Figure | Value | How to say it |
+|---|---|---|
+| MAE | **2.04 GW** (nMAE 18%) | "On average the day-ahead wind forecast misses by about 2 GW" |
+| Bias | **+1.75 GW**; 85% of hours over-forecast | "It almost always expects more wind than turns up" |
+| Buffer (P90) | **4.1 GW** | "Plan for about 4 GW less wind than forecast to be covered 90% of the time" |
+| Bias vs wind level | +0.8 GW below 6 GW → **+2.5 GW above 14 GW** | "The stronger the wind, the bigger the miss: likely curtailment (not confirmed)" |
+| Lead time | MAE **2.33 GW** at 42–48 h → **1.69 GW** at 0–6 h | "Forecasts get better closer to delivery" |
+| Waiting until N2EX close (09:50) | MAE 2.04 → 2.01 GW | "The 09:30 update barely helps; the morning forecasts are very similar" |
+| Best day | **19 Jan**: MAE 0.74 GW (but under-forecast, bias −0.73 GW) | |
+| Worst day | **28 Jan**: forecast **267 GWh**, actual **138 GWh**, MAE 5.4 GW, 0/24 hours inside the band | "On 28 Jan, relying on the forecast would have left you short by about 5 GW all day" |
+| Hour of day | Best 21:00 (MAE 1.79 GW), worst 05:00 (2.43 GW) | |
 
 **Review checklist**
 - Do the numbers tell a clear story for the client pitch?
@@ -376,3 +395,4 @@ snapshot in 1.4 s; snapshot mode 0.13 s; analysis 72 ms first time, then 0 ms (c
 | 7 – Error metrics | 2026-10-24 | ✅ Approved (option A) | 13 tests; `by_horizon` changed to use all forecasts (MAE 1.69 GW at 0–6 h → 2.33 GW at 42–48 h); real data at 09:00: MAE 2.04 GW, bias +1.75 GW, buffer 4.1 GW; bias grows with wind level (likely curtailment, not confirmed) |
 | 8 – DataStore | 2026-10-24 | ✅ Approved | Loads once (lock, tested with 8 simultaneous requests); `auto` falls back to the snapshot (simulated Elexon outage tested); `analysis` and `horizon_stats` cached; `loaded_at` renamed `fetched_at`; 10 tests |
 | 9 – API endpoints | 2026-10-24 | ✅ Approved | 4 endpoints under `/api`; clear 422/503 messages; numbers rounded to 1 dp, NaN → null; `missing_forecast_hours` added; real server 17–43 ms per request; frontend types updated to match; 11 tests (77 total) |
+| 10 – Real-data checks | 2026-10-24 | ✅ Approved | 3/3 spot checks match raw Elexon exactly (`scripts/spot_check.py`); headline: MAE 2.04 GW, bias +1.75 GW (85% of hours over-forecast), P90 buffer 4.1 GW, worst day 28 Jan (267 vs 138 GWh); 81% of actuals in band; idea for later: bias-corrected forecast line |
