@@ -129,8 +129,8 @@ frontend/
 │ bias                                │ │ with P10 / P50 / P90 markers          │
 └─────────────────────────────────────┘ └──────────────────────────────────────┘
 ┌ Daily error over January ───────────┐ ┌ Error by how far ahead ──────────────┐
-│ MAE per delivery day (click a bar → │ │ MAE per 6-hour bucket                 │
-│ opens that day in Tab 1)            │ │                                       │
+│ MAE per delivery day (click a bar → │ │ MAE vs hours ahead, all forecasts     │
+│ opens that day in Tab 1)            │ │ (2.3 GW at 2 days → 1.7 GW at 6 h)    │
 └─────────────────────────────────────┘ └──────────────────────────────────────┘
 ```
 - **Clicking a day in the daily chart** jumps to the Day-ahead view for that decision date, which links the two
@@ -155,7 +155,7 @@ frontend/
 | `ErrorByHourChart` | `byHour` | `ComposedChart`: MAE bars + P10–P90 band + bias line |
 | `ErrorHistogram` | `histogram`, `p10`, `p50`, `p90` | `BarChart` + `ReferenceLine` markers; bars shaded differently for over- and under-forecast |
 | `DailyErrorChart` | `daily`, `onSelectDay` | `BarChart` of MAE per day; clicking opens that day in Tab 1 |
-| `HorizonChart` | `byHorizon` | `BarChart` of MAE per horizon bucket |
+| `HorizonChart` | `byHorizon` | `BarChart` of MAE per 6-hour lead-time bucket, using all forecasts (doesn't change with the cutoff). Shows accuracy improving closer to delivery; buckets with few hours (n < 100) shown faded |
 | `ChartTooltip` | Recharts tooltip props | Shared style; shows UK time, forecast, actual, error, publish time, horizon |
 | `LoadingState` / `ErrorState` / `EmptyState` | `message?`, `onRetry?` | Grey placeholder blocks while loading; retry button on errors |
 

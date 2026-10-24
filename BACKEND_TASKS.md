@@ -36,7 +36,7 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 | 4 | [Snapshot (backup data)](#task-4--snapshot-backup-data) | 10 min | ✅ |
 | 5 | [Actuals: half-hourly → hourly](#task-5--actuals-half-hourly--hourly) | 15 min | ✅ |
 | 6 | [Decision-time forecast selection](#task-6--decision-time-forecast-selection) | 30 min | ✅ |
-| 7 | [Error metrics](#task-7--error-metrics) | 30 min | ⬜ |
+| 7 | [Error metrics](#task-7--error-metrics) | 30 min | ✅ |
 | 8 | [DataStore (loading + cache)](#task-8--datastore-loading--cache) | 20 min | ⬜ |
 | 9 | [API endpoints](#task-9--api-endpoints) | 35 min | ⬜ |
 | 10 | [Check results against real data](#task-10--check-results-against-real-data) | 15 min | ⬜ |
@@ -217,29 +217,32 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 ---
 
 ## Task 7 – Error metrics
-**Status:** ⬜ · **Depends on:** 5, 6
+**Status:** ✅ Done · **Depends on:** 5, 6
 
 **Files:** `backend/app/metrics.py`, `backend/tests/test_metrics.py`
 
 **Steps**
-- [ ] `join_actuals(selected, actuals_hourly) -> DataFrame` with `error_mw = forecast_mw − actual_mw`
-- [ ] `summary(errors, actuals)`: MAE, RMSE, bias, nMAE %, P10/P50/P90, P90 of absolute error, max over/under
-- [ ] `recommendation(errors, coverage=0.9) -> buffer_mw` (= P90 of the error)
-- [ ] `by_hour(df)`: for each UK hour 0–23: MAE, bias, P10, P90, n
-- [ ] `by_horizon(df, bucket_h=6)`: MAE, bias, n per bucket
-- [ ] `daily(df)`: per delivery day: MAE, bias, forecast and actual energy (MWh)
-- [ ] `histogram(errors, bin_mw=500)`
-- [ ] `uncertainty_band(forecast_mw, hour, by_hour)` → `(low, high)` = `forecast − P90`, `forecast − P10`
+- [x] `join_actuals(selected, actuals_hourly) -> DataFrame` with `error_mw = forecast_mw − actual_mw`
+- [x] `summary(df)`: MAE, RMSE, bias, nMAE %, P10/P50/P90, P90 of absolute error, max over/under
+- [x] `recommendation(df, coverage=0.9) -> buffer_mw` (= P90 of the error)
+- [x] `by_hour(df)`: for each UK hour 0–23: MAE, bias, P10, P90, n
+- [x] `by_horizon(forecasts, actuals_hourly, bucket_h=6)`: MAE, bias, P10, P90, n per bucket, using **all
+      forecasts** (decided in review: with one fixed cutoff, horizon only repeats hour of day)
+- [x] `daily(df)`: per delivery day: MAE, bias, forecast and actual energy (MWh)
+- [x] `histogram(df, bin_mw=500)`
+- [x] `add_uncertainty_band(points, hour_stats)` → `band_low = forecast − P90`, `band_high = forecast − P10`
 
 **Tests**
-- [ ] Known inputs give known results: errors `[−2, 0, 2]` → MAE 1.33, RMSE 1.63, bias 0
-- [ ] Sign convention: forecast 10 and actual 8 → error +2 (over-forecast)
-- [ ] Percentiles match `numpy.percentile`
-- [ ] Histogram counts add up to n
-- [ ] Empty input → `None`/0, no crash
-- [ ] Hourly energy: 24 hours at 1,000 MW = 24,000 MWh
+- [x] Known inputs give known results: errors `[−2, 0, 2]` → MAE 1.33, RMSE 1.63, bias 0
+- [x] Sign convention: forecast 10 and actual 8 → error +2 (over-forecast)
+- [x] Percentiles match `numpy.percentile`
+- [x] Histogram counts add up to n
+- [x] Empty input → `None`/0, no crash
+- [x] Hourly energy: 24 hours at 1,000 MW = 24,000 MWh
+- [x] Extra: by-hour uses UK time (BST case) · horizon uses every forecast and skips late/out-of-range/no-actual rows
 
-**Done when:** tests pass and ruff passes
+**Done when:** tests pass and ruff passes ✓ (56 tests). Real data at 09:00: MAE 2.04 GW, bias +1.75 GW,
+buffer 4.1 GW; 81% of actuals inside the P10–P90 band
 
 **Review checklist**
 - Is the sign convention (forecast − actual) the same everywhere?
@@ -259,6 +262,7 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 - [ ] `auto` mode: try live; if that fails, log a warning and use the snapshot
 - [ ] Exposes `actuals_hourly`, `forecasts`, `source`, `loaded_at`
 - [ ] `analysis(cutoff)`: selection + join, cached per cutoff (`lru_cache`)
+- [ ] `horizon_stats()`: `metrics.by_horizon` worked out once and cached (it doesn't depend on the cutoff)
 - [ ] `get_store()` returns one shared store for the FastAPI app
 - [ ] Raises `DataUnavailableError` if no source works
 
@@ -358,3 +362,4 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 | 4 – Snapshot | 2026-10-24 | ✅ Approved | Gzipped JSON, 100 KB total; identical to a fresh live fetch; same data gives a byte-identical file; 3 tests |
 | 5 – Hourly actuals | 2026-10-24 | ✅ Approved | Average of the two half-hours; incomplete hours dropped with a warning; 5 tests; real data 1,488 → 744 hours, none dropped |
 | 6 – Forecast selection ⭐ | 2026-10-24 | ✅ Approved | 11 tests; real data at 09:00 = 744 h, all from the 07:30 forecast, 16.5–39.5 h ahead; row-by-row check 0 mismatches at 4 cutoffs; found that a 00:00 cutoff leaves 22:00–23:00 without a forecast (Task 9 must report the missing hours) |
+| 7 – Error metrics | 2026-10-24 | ✅ Approved (option A) | 13 tests; `by_horizon` changed to use all forecasts (MAE 1.69 GW at 0–6 h → 2.33 GW at 42–48 h); real data at 09:00: MAE 2.04 GW, bias +1.75 GW, buffer 4.1 GW; bias grows with wind level (likely curtailment, not confirmed) |

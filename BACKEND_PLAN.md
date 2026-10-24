@@ -153,7 +153,11 @@ Sign convention: **error = forecast − actual** (MW).
 
 **Breakdowns**
 - **By hour of day** (0–23): MAE, bias, P10, P90, n
-- **By horizon**, in 6-hour buckets (e.g. 12–18 h, 18–24 h, …): MAE, bias, n
+- **By horizon**, in 6-hour buckets (0–6 h, 6–12 h, … up to about 66 h): MAE, bias, P10, P90, n.
+  This uses **every forecast published before each target hour**, not just the one picked at the cutoff, so it
+  doesn't depend on the cutoff. (With one fixed cutoff, each hour of day always has the same lead time, so the
+  picked forecasts alone would only repeat "by hour".) It shows how accuracy improves closer to delivery:
+  MAE is 1.69 GW at 0–6 h ahead and 2.33 GW at 42–48 h ahead.
 - **Daily**, per delivery day: MAE, bias, forecast and actual energy (MWh)
 - **Histogram** of errors: 500 MW bins, as `{bin_start, bin_end, count}`
 
@@ -162,7 +166,8 @@ Sign convention: **error = forecast − actual** (MW).
 *Limitation (goes in the README):* the band uses the whole month's statistics. In production it would use only
 past days, to avoid using information that wasn't yet known.
 
-**Functions:** `summary(errors)`, `by_hour(df)`, `by_horizon(df)`, `daily(df)`, `histogram(errors, bin_mw=500)`.
+**Functions:** `summary(df)`, `recommendation(df)`, `by_hour(df)`, `by_horizon(forecasts, actuals_hourly)`,
+`daily(df)`, `histogram(df, bin_mw=500)`, `add_uncertainty_band(points, hour_stats)`.
 Each is a pure function on DataFrames/Series, so it's easy to test.
 
 ---
@@ -254,7 +259,8 @@ and on Vercel. Swagger UI is available at `/api/docs`.
   },
   "recommendation": { "coverage": 0.9, "buffer_mw": 1800 },
   "by_hour":    [{ "hour": 0, "mae_mw": 1000, "bias_mw": 200, "p10_mw": -1200, "p90_mw": 1600, "n": 31 }],
-  "by_horizon": [{ "bucket": "12-18h", "mae_mw": 900, "bias_mw": 150, "n": 62 }],
+  "by_horizon": [{ "bucket": "12-18h", "bucket_start_h": 12, "mae_mw": 1855, "bias_mw": 1654,
+                   "p10_mw": -142, "p90_mw": 3735, "n": 1470 }],
   "daily":      [{ "delivery_date": "2026-01-02", "mae_mw": 800, "bias_mw": -100,
                    "forecast_energy_mwh": 240000, "actual_energy_mwh": 242000 }],
   "histogram":  [{ "bin_start_mw": -1500, "bin_end_mw": -1000, "count": 42 }]
@@ -357,3 +363,7 @@ uvicorn app.main:app --reload --port 8000           # http://localhost:8000/api/
 4. The uncertainty band and buffer use **all of January's** error statistics (a pilot analysis, which includes
    later days); a production version would use only past days.
 5. Only national wind from Elexon FUELHH / WINDFOR is used, as the brief requires.
+6. **Finding:** WINDFOR forecasts are consistently higher than FUELHH actuals (bias about +1.75 GW in January),
+   and the gap grows with wind level (+0.8 GW below 6 GW, +2.5 GW above 14 GW). A likely cause is curtailment
+   (wind farms paid to reduce output because of grid limits). **This is not confirmed**; present it as a likely
+   explanation only.
