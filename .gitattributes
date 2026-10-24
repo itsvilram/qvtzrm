@@ -1,0 +1,7 @@
+# Store text files with LF line endings so Docker images and scripts behave the same on every OS.
+* text=auto eol=lf
+
+*.gz binary
+*.png binary
+*.jpg binary
+*.ico binary

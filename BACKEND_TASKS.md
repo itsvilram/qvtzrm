@@ -31,7 +31,7 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 | # | Task | Time | Status |
 |---|---|---|---|
 | 1 | [Project setup](#task-1--project-setup) | 15 min | ✅ |
-| 2 | [Configuration](#task-2--configuration) | 10 min | ⬜ |
+| 2 | [Configuration](#task-2--configuration) | 10 min | ✅ |
 | 3 | [Elexon API client](#task-3--elexon-api-client) | 25 min | ⬜ |
 | 4 | [Snapshot (backup data)](#task-4--snapshot-backup-data) | 10 min | ⬜ |
 | 5 | [Actuals: half-hourly → hourly](#task-5--actuals-half-hourly--hourly) | 15 min | ⬜ |
@@ -75,25 +75,25 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 ---
 
 ## Task 2 – Configuration
-**Status:** ⬜ · **Depends on:** 1
+**Status:** ✅ Done · **Depends on:** 1
 
-**Files:** `backend/app/config.py`
+**Files:** `backend/app/config.py`, `backend/tests/test_config.py`, `.gitattributes`
 
 **Steps**
-- [ ] Constants:
+- [x] Constants:
   - `ELEXON_BASE_URL`, `TIMEZONE = ZoneInfo("Europe/London")`
   - `DECISION_DATE_MIN = 2026-01-01`, `DECISION_DATE_MAX = 2026-01-31`
   - `DEFAULT_CUTOFF = time(9, 0)`, `HTTP_TIMEOUT_S = 30`, `HTTP_RETRIES = 3`
-- [ ] Derived ranges:
+- [x] Derived ranges:
   - delivery dates (Jan 2 – Feb 1)
   - forecast publish window (Dec 31 00:00 UTC – Feb 1 00:00 UTC)
-- [ ] Env overrides: `ELEXON_BASE_URL`, `DEFAULT_CUTOFF`, `DATA_SOURCE` (`auto|live|snapshot`), `CORS_ORIGINS`
-- [ ] `parse_cutoff("09:00") -> time` helper that rejects bad input with a `ValueError`
+- [x] Env overrides: `ELEXON_BASE_URL`, `DEFAULT_CUTOFF`, `DATA_SOURCE` (`auto|live|snapshot`), `CORS_ORIGINS`
+- [x] `parse_cutoff("09:00") -> time` helper that rejects bad input with a `ValueError`
 
 **Done when**
-- [ ] Importing `app.config` works and the values are correct
-- [ ] A bad `DATA_SOURCE` value gives a clear error
-- [ ] Ruff passes
+- [x] Importing `app.config` works and the values are correct
+- [x] A bad `DATA_SOURCE` value gives a clear error
+- [x] Ruff passes (`ruff check` + `ruff format --check`); 16 tests pass
 
 **Review checklist**
 - Is everything configurable in one place, with no magic numbers elsewhere?
@@ -346,3 +346,4 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 | Task | Date | Result | Notes |
 |---|---|---|---|
 | 1 – Project setup | 2026-10-24 | ✅ Approved | Pinned versions; ruff + pytest set up; assignment `.docx` kept out of git; commits use the personal identity `itsvilram`, set for this repo only |
+| 2 – Configuration | 2026-10-24 | ✅ Approved | Settings in one place with env overrides; strict `HH:MM` cutoff; bad `DATA_SOURCE` stops startup; 16 tests; added `.gitattributes` (Unix line endings) and `ruff format` |
