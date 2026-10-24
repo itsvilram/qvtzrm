@@ -315,6 +315,8 @@ npm run dev            # http://localhost:5173 (the Vite proxy forwards /api →
 
 ## 10. Task checklist (in order)
 
+> The detailed step-by-step tasks, with review checkpoints, are in [FRONTEND_TASKS.md](FRONTEND_TASKS.md).
+
 | # | Task | Time | Done |
 |---|---|---|---|
 | 1 | Create the Vite React-TS project, add dependencies, ESLint/Prettier, Vite proxy | 10 min | ☐ |
