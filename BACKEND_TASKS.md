@@ -35,7 +35,7 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 | 3 | [Elexon API client](#task-3--elexon-api-client) | 25 min | ✅ |
 | 4 | [Snapshot (backup data)](#task-4--snapshot-backup-data) | 10 min | ✅ |
 | 5 | [Actuals: half-hourly → hourly](#task-5--actuals-half-hourly--hourly) | 15 min | ✅ |
-| 6 | [Decision-time forecast selection](#task-6--decision-time-forecast-selection) | 30 min | ⬜ |
+| 6 | [Decision-time forecast selection](#task-6--decision-time-forecast-selection) | 30 min | ✅ |
 | 7 | [Error metrics](#task-7--error-metrics) | 30 min | ⬜ |
 | 8 | [DataStore (loading + cache)](#task-8--datastore-loading--cache) | 20 min | ⬜ |
 | 9 | [API endpoints](#task-9--api-endpoints) | 35 min | ⬜ |
@@ -180,30 +180,34 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 ---
 
 ## Task 6 – Decision-time forecast selection
-**Status:** ⬜ · **Depends on:** 2, 3 · ⭐ **Core logic: review carefully**
+**Status:** ✅ Done · **Depends on:** 2, 3 · ⭐ **Core logic: review carefully**
 
 **Files:** `backend/app/forecasts.py`, `backend/tests/test_forecasts.py`
 
 **Steps**
-- [ ] `cutoff_for_target(start_time, cutoff) -> UTC timestamp`: the day before the target's London date, at
-      `cutoff` London time
-- [ ] `select_decision_forecasts(forecasts, cutoff) -> DataFrame[start_time, forecast_mw, publish_time, horizon_h, decision_date]`
+- [x] `decision_cutoff_utc(delivery_date, cutoff) -> UTC timestamp`: `cutoff` UK time on the day before the
+      delivery date (renamed from `cutoff_for_target`; it takes the delivery date because all hours of one
+      day share one cutoff)
+- [x] `select_decision_forecasts(forecasts, cutoff) -> DataFrame[start_time, decision_date, publish_time, horizon_h, forecast_mw]`
   - keep `publish_time <= cutoff_ts`
   - pick the latest `publish_time` for each `start_time`
-- [ ] Keep only target hours on delivery days (Jan 2 – Feb 1)
+- [x] Keep only target hours on delivery days (Jan 2 – Feb 1)
 
 **Tests**
-- [ ] Picks the latest forecast before the cutoff (e.g. with cutoff 09:00, picks 07:30, not 04:30)
-- [ ] Ignores a forecast published after the cutoff (09:30)
-- [ ] A forecast published exactly at the cutoff counts
-- [ ] A late publish (12:25 instead of 11:30) works with cutoff 13:00
-- [ ] Target hours with no eligible forecast are left out
-- [ ] `horizon_h` is correct (07:30 → next day 00:00 = 16.5 h)
-- [ ] `decision_date` is the delivery day minus 1
+- [x] Picks the latest forecast before the cutoff (e.g. with cutoff 09:00, picks 07:30, not 04:30)
+- [x] Ignores a forecast published after the cutoff (09:30)
+- [x] A forecast published exactly at the cutoff counts
+- [x] A late publish (12:25 instead of 11:30) works with cutoff 13:00
+- [x] Target hours with no eligible forecast are left out
+- [x] `horizon_h` is correct (07:30 → next day 00:00 = 16.5 h)
+- [x] `decision_date` is the delivery day minus 1
+- [x] Extra: each delivery day uses its own cutoff · out-of-range targets dropped · sorted output ·
+      empty input · UK summer time (09:00 BST = 08:00 UTC)
 
 **Done when**
-- [ ] Tests pass
-- [ ] Run on the real data with cutoff 09:00: 744 target hours, all using a 07:30 publish, horizons 16.5–39.5 h
+- [x] Tests pass (43 in total, 11 new)
+- [x] Run on the real data with cutoff 09:00: 744 target hours, all using a 07:30 publish, horizons 16.5–39.5 h
+      → exactly that; a separate row-by-row check gives 0 mismatches at cutoffs 00:00, 09:00, 09:50 and 13:00
 
 **Review checklist**
 - Is the London-time handling right (`cutoff` is UK time, data is UTC)?
@@ -353,3 +357,4 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 | 3 – Elexon API client | 2026-10-24 | ✅ Approved | Clean UTC tables; retries network/5xx errors but not 4xx; 8 tests with a fake server; real API: 1,488 actual rows, 18,688 forecast rows (256 forecasts) |
 | 4 – Snapshot | 2026-10-24 | ✅ Approved | Gzipped JSON, 100 KB total; identical to a fresh live fetch; same data gives a byte-identical file; 3 tests |
 | 5 – Hourly actuals | 2026-10-24 | ✅ Approved | Average of the two half-hours; incomplete hours dropped with a warning; 5 tests; real data 1,488 → 744 hours, none dropped |
+| 6 – Forecast selection ⭐ | 2026-10-24 | ✅ Approved | 11 tests; real data at 09:00 = 744 h, all from the 07:30 forecast, 16.5–39.5 h ahead; row-by-row check 0 mismatches at 4 cutoffs; found that a 00:00 cutoff leaves 22:00–23:00 without a forecast (Task 9 must report the missing hours) |
