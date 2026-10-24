@@ -13,10 +13,15 @@ interface Props {
   children?: ReactNode
 }
 
-/** The one filter row above the content: decision date and cutoff scope everything below. */
+/** The one filter row above the content; it scopes everything below it. */
+export function ControlsRow({ children }: { children: ReactNode }) {
+  return <div className={styles.row}>{children}</div>
+}
+
+/** Decision date and cutoff for the day-ahead view. */
 export function DecisionControls({ date, cutoff, minDate, maxDate, onChange, children }: Props) {
   return (
-    <div className={styles.row}>
+    <ControlsRow>
       <label className={styles.field}>
         <span className={styles.label}>Decision date</span>
         <input
@@ -35,7 +40,7 @@ export function DecisionControls({ date, cutoff, minDate, maxDate, onChange, chi
       </label>
       <CutoffSelect cutoff={cutoff} onChange={onChange} />
       {children}
-    </div>
+    </ControlsRow>
   )
 }
 

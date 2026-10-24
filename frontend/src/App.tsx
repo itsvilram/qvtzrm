@@ -64,7 +64,7 @@ function Dashboard({ meta }: { meta: Meta }) {
               onChange={update}
             />
           ) : (
-            <AccuracyPage cutoff={state.cutoff} />
+            <AccuracyPage cutoff={state.cutoff} onChange={update} />
           )}
         </TabPanel>
       </main>

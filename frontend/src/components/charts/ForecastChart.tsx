@@ -9,6 +9,7 @@ import {
   YAxis,
 } from 'recharts'
 import type { DayAheadPoint } from '../../api/types.ts'
+import { axisLine, axisTick, gigawattTick } from '../../lib/chartStyle.ts'
 import { AREA_OPACITY, chartColors } from '../../lib/colors.ts'
 import {
   formatHoursAhead,
@@ -50,9 +51,6 @@ function toChartPoint(point: DayAheadPoint): ChartPoint {
   }
 }
 
-const axisTick = { fill: chartColors.label }
-const gigawatts = (mw: number) => `${mw / 1000} GW`
-
 interface Props {
   points: DayAheadPoint[]
   showActuals: boolean
@@ -85,17 +83,11 @@ export function ForecastChart({ points, showActuals, summary }: Props) {
         aria-label={summary}
       >
         <CartesianGrid vertical={false} stroke={chartColors.grid} />
-        <XAxis
-          dataKey="hour"
-          interval={2}
-          tick={axisTick}
-          tickLine={false}
-          axisLine={{ stroke: chartColors.axis }}
-        />
+        <XAxis dataKey="hour" interval={2} tick={axisTick} tickLine={false} axisLine={axisLine} />
         <YAxis
           width={52}
           domain={[0, 'auto']}
-          tickFormatter={gigawatts}
+          tickFormatter={gigawattTick}
           tick={axisTick}
           tickLine={false}
           axisLine={false}

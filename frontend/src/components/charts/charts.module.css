@@ -5,6 +5,29 @@
   gap: var(--space-3);
 }
 
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.cardHint {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.clickable :global(.recharts-bar-rectangle) {
+  cursor: pointer;
+}
+
+.openButton {
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  background: none;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
 /* Legend */
 .legend {
   display: flex;

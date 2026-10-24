@@ -72,6 +72,43 @@ export function TooltipRow({
   )
 }
 
+/** Dot key, for point marks such as an average. */
+export function DotKey({ color }: { color: string }) {
+  return (
+    <svg className={styles.key} viewBox="0 0 16 8" aria-hidden="true">
+      <circle cx="8" cy="4" r="3.5" fill={color} />
+    </svg>
+  )
+}
+
+/** A card holding one chart: title, a one-line hint on how to read it, legend, chart, table. */
+export function ChartCard({
+  id,
+  title,
+  hint,
+  legend,
+  children,
+}: {
+  id: string
+  title: string
+  hint: string
+  legend?: ReactNode
+  children: ReactNode
+}) {
+  return (
+    <section className={`card ${styles.figure}`} aria-labelledby={id}>
+      <div>
+        <h2 id={id} className={styles.cardTitle}>
+          {title}
+        </h2>
+        <p className={styles.cardHint}>{hint}</p>
+      </div>
+      {legend}
+      {children}
+    </section>
+  )
+}
+
 /** The accessible twin of a chart: the same numbers as a table, one click away. */
 export function TableView({ summary, children }: { summary: string; children: ReactNode }) {
   return (

@@ -40,7 +40,7 @@ Same as the backend:
 | 3 | [API layer and URL state](#task-3--api-layer-and-url-state) | 20 min | ✅ |
 | 4 | [App shell (header, tabs, loading/error states)](#task-4--app-shell) | 15 min | ✅ |
 | 5 | [Day-ahead view](#task-5--day-ahead-view) | 40 min | ✅ |
-| 6 | [Forecast accuracy view](#task-6--forecast-accuracy-view) | 45 min | ⬜ |
+| 6 | [Forecast accuracy view](#task-6--forecast-accuracy-view) | 45 min | ✅ |
 | 7 | [Responsive layout, accessibility, polish](#task-7--responsive-layout-accessibility-polish) | 15 min | ⬜ |
 | 8 | [Docker + docker compose (full stack)](#task-8--docker--docker-compose) | 20 min | ⬜ |
 | 9 | [End-to-end check in the browser](#task-9--end-to-end-check-in-the-browser) | 15 min | ⬜ |
@@ -247,35 +247,45 @@ Same as the backend:
 ---
 
 ## Task 6 – Forecast accuracy view
-**Status:** ⬜ · **Depends on:** 5
+**Status:** ✅ Done · **Depends on:** 5
 
 **Files**
 - `src/pages/AccuracyPage.tsx`
-- `src/components/cards/RecommendationCard.tsx`, `InfoTip.tsx`
-- `src/components/charts/ErrorByHourChart.tsx`, `ErrorHistogram.tsx`, `DailyErrorChart.tsx`, `HorizonChart.tsx`
-- `src/test/AccuracyPage.test.tsx`
+- `src/components/cards/RecommendationCard.tsx`, `InfoTip.tsx` (+ CSS); `KpiCard` gains an `info` prop
+- `src/components/charts/ErrorByHourChart.tsx`, `ErrorHistogram.tsx`, `DailyErrorChart.tsx`, `HorizonChart.tsx`;
+  `ChartCard` + `DotKey` added to `ChartParts.tsx`
+- `src/lib/chartStyle.ts` (shared axis styles, used by all 5 charts), `src/lib/dates.ts` (`addDays`)
+- `src/components/controls/DecisionControls.tsx`: `ControlsRow` shared by both pages
+- `src/test/AccuracyPage.test.tsx`, `src/test/dates.test.ts`
 
 **Steps**
-- [ ] Cutoff control + period line ("Delivery 2 Jan – 1 Feb 2026 · 744 hours")
-- [ ] 5 summary cards (MAE, RMSE, bias, nMAE, P90 miss), each with an ⓘ tooltip in plain English
-- [ ] `RecommendationCard`: *"To be covered in 90% of hours, plan for 4.1 GW less wind than the forecast"*,
-      plus a bias sentence (*"Wind was over-forecast on average by 1.7 GW, so there's a risk of buying too little"*)
-- [ ] `ErrorByHourChart`: MAE bars + P10–P90 band + bias line, by UK hour
-- [ ] `ErrorHistogram`: bars coloured by over-/under-forecast, with P10/P50/P90 markers
-- [ ] `DailyErrorChart`: MAE per delivery day; **clicking a bar opens the day-ahead view for that day**
-      (decision date = delivery date − 1)
-- [ ] `HorizonChart`: MAE by hours ahead, with a note that it uses all forecasts (so it doesn't change with the
+- [x] Cutoff control + period line ("… for delivery 2 Jan to 1 Feb 2026 · 744 hours")
+- [x] 5 summary cards (MAE, RMSE, bias, nMAE, P90 miss), each with an ⓘ tooltip in plain English (hover and
+      keyboard focus)
+- [x] `RecommendationCard`: *"Plan for about 4.1 GW less wind than the forecast"*, plus *"The forecast was too
+      high in 85% of hours, by 1.7 GW on average, so without a margin you would usually buy too little power"*
+      and *"Past errors are a guide, not a guarantee"*. Changed: placed **above** the cards, as the main message
+- [x] `ErrorByHourChart`: changed to **floating P10–P90 range bars + average-error dots** by UK hour (MAE is in
+      the tooltip and table); one chart, one job
+- [x] `ErrorHistogram`: bars coloured by over-/under-forecast, with P10/P90 markers and a zero line
+- [x] `DailyErrorChart`: changed to the **signed average error** per delivery day (red/blue), so under-forecast
+      days such as 19 Jan show; **clicking a bar opens the day-ahead view for that day** (decision date =
+      delivery date − 1); the table view has an "Open" button per day for keyboard users
+- [x] `HorizonChart`: MAE by hours ahead, with a note that it uses all forecasts (so it doesn't change with the
       cutoff); buckets with fewer than 100 hours are shown faded
+- [x] Every chart has a table view and a screen-reader summary
 
 **Tests**
-- [ ] `AccuracyPage` (faked API): shows the summary cards and the recommendation sentence with the right value
-- [ ] Clicking a day calls the navigation with decision date = delivery date − 1
+- [x] `AccuracyPage` (faked API): shows the summary cards and the recommendation sentence with the right value
+- [x] Clicking a day calls the navigation with decision date = delivery date − 1
+- [x] Extra: ⓘ text is the button's accessible description · cutoff change · error state · `addDays` across
+      month/year ends · axis tick labels
 
 **Done when**
-- [ ] Standard checks pass
-- [ ] With real data at 09:00: MAE **2.04 GW**, bias **+1.75 GW**, buffer **4.1 GW**; clicking **28 Jan** opens
-      the day-ahead view for decision date **27 Jan**
-- [ ] Screenshot in the review
+- [x] Standard checks pass (63 tests)
+- [x] With real data at 09:00: MAE **2,039 MW** ✓, bias **+1,748 MW** ✓, buffer **4.1 GW** ✓, 85% over-forecast ✓;
+      clicking the **28 Jan** bar opens the day-ahead view for decision date **27 Jan** ✓; no console errors
+- [x] Screenshots in the review (light, dark, each chart's tooltip, ⓘ tooltip)
 
 **Review checklist**
 - Is the recommendation wording accurate and not overstated?
@@ -360,3 +370,4 @@ Same as the backend:
 | 3 – API layer, URL state | 2026-10-24 | ✅ Approved | Types verified against the backend OpenAPI schema (77 fields, 12 models identical); readable `ApiError`s; never-stale cache, keep previous data, retry 5xx not 4xx; URL state with limits from `/api/meta`; 42 tests |
 | 4 – App shell | 2026-10-24 | ✅ Approved | Header with Live/Snapshot badge and visible fetch time; keyboard tabs kept in the URL; loading/error/empty states; screenshots caught an unhelpful 502 message and a CSS order bug (both fixed); 47 tests |
 | 5 – Day-ahead view | 2026-10-24 | ✅ Approved | Controls, info line, 4 cards, forecast/band/actual chart with crosshair tooltip and table view, actuals toggle; checked in Chrome via Playwright on real data (Jan 27: 267 vs 138 GWh; 09:50 → 09:30 forecast; no console errors); fixed mixed units in ranges; 54 tests |
+| 6 – Accuracy view | 2026-10-24 | ✅ Approved | Recommendation (4.1 GW, 85% over-forecast), 5 cards with ⓘ, 4 charts with tooltips and tables; click a day → day-ahead (28 Jan → decision 27 Jan) verified in Chrome; hour-chart bars lightened so dots show; 63 tests |

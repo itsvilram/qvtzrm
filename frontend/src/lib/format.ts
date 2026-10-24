@@ -91,6 +91,15 @@ export function formatUkDate(isoOrDate: string): string {
     .replace(',', '')
 }
 
+/** ISO time or `YYYY-MM-DD` → `28 Jan` (UK date), for compact axis labels. */
+export function formatDayMonth(isoOrDate: string): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: UK_TIMEZONE,
+    day: 'numeric',
+    month: 'short',
+  }).format(toDate(isoOrDate))
+}
+
 /** ISO time → `15 Jan 07:30` (UK time). */
 export function formatUkDateTime(iso: string): string {
   const date = new Intl.DateTimeFormat('en-GB', {
