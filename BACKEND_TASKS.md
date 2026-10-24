@@ -34,7 +34,7 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 | 2 | [Configuration](#task-2--configuration) | 10 min | ✅ |
 | 3 | [Elexon API client](#task-3--elexon-api-client) | 25 min | ✅ |
 | 4 | [Snapshot (backup data)](#task-4--snapshot-backup-data) | 10 min | ✅ |
-| 5 | [Actuals: half-hourly → hourly](#task-5--actuals-half-hourly--hourly) | 15 min | ⬜ |
+| 5 | [Actuals: half-hourly → hourly](#task-5--actuals-half-hourly--hourly) | 15 min | ✅ |
 | 6 | [Decision-time forecast selection](#task-6--decision-time-forecast-selection) | 30 min | ⬜ |
 | 7 | [Error metrics](#task-7--error-metrics) | 30 min | ⬜ |
 | 8 | [DataStore (loading + cache)](#task-8--datastore-loading--cache) | 20 min | ⬜ |
@@ -157,21 +157,22 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 ---
 
 ## Task 5 – Actuals: half-hourly → hourly
-**Status:** ⬜ · **Depends on:** 3
+**Status:** ✅ Done · **Depends on:** 3
 
 **Files:** `backend/app/actuals.py`, `backend/tests/test_actuals.py`
 
 **Steps**
-- [ ] `to_hourly(actuals) -> DataFrame[start_time, actual_mw]`
+- [x] `to_hourly(actuals) -> DataFrame[start_time, actual_mw]`
   - Round each time down to the hour and average the two half-hours
-  - Keep an hour only if both half-hours exist
+  - Keep an hour only if both half-hours exist (logs a warning with how many were dropped)
 
 **Tests**
-- [ ] 00:00 = 100 and 00:30 = 200 → 00:00 = 150
-- [ ] An hour with only one half-hour is dropped
-- [ ] Output is sorted with no duplicates
+- [x] 00:00 = 100 and 00:30 = 200 → 00:00 = 150
+- [x] An hour with only one half-hour is dropped
+- [x] Output is sorted with no duplicates
+- [x] Extra: a duplicate half-hour keeps the last value; empty input gives an empty frame with columns
 
-**Done when:** tests pass and ruff passes
+**Done when:** tests pass and ruff passes ✓ (32 tests). Real data: 1,488 half-hours → 744 hours, none dropped
 
 **Review checklist**
 - Is the averaging assumption written in the function docstring?
@@ -351,3 +352,4 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 | 2 – Configuration | 2026-10-24 | ✅ Approved | Settings in one place with env overrides; strict `HH:MM` cutoff; bad `DATA_SOURCE` stops startup; 16 tests; added `.gitattributes` (Unix line endings) and `ruff format` |
 | 3 – Elexon API client | 2026-10-24 | ✅ Approved | Clean UTC tables; retries network/5xx errors but not 4xx; 8 tests with a fake server; real API: 1,488 actual rows, 18,688 forecast rows (256 forecasts) |
 | 4 – Snapshot | 2026-10-24 | ✅ Approved | Gzipped JSON, 100 KB total; identical to a fresh live fetch; same data gives a byte-identical file; 3 tests |
+| 5 – Hourly actuals | 2026-10-24 | ✅ Approved | Average of the two half-hours; incomplete hours dropped with a warning; 5 tests; real data 1,488 → 744 hours, none dropped |
