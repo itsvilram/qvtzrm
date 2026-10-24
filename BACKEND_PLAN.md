@@ -185,7 +185,7 @@ Each is a pure function on DataFrames/Series, so it's easy to test.
     - `auto` (default): live, falling back to the snapshot
     - `live`: live only
     - `snapshot`: snapshot only
-  - Exposes `actuals_hourly`, `forecasts`, `source` (`"live"` / `"snapshot"`) and `loaded_at`
+  - Exposes `actuals_hourly`, `forecasts`, `source` (`"live"` / `"snapshot"`) and `fetched_at`
 - **Snapshot**
   - `python -m app.snapshot` fetches the live data and writes the gzipped JSON backup files (~300 KB total)
   - The backup is committed to the repo, so demos, tests and Vercel cold starts never depend on Elexon being up
@@ -212,7 +212,7 @@ and on Vercel. Swagger UI is available at `/api/docs`.
   "timezone": "Europe/London",
   "publish_times_utc": ["02:30", "04:30", "07:30", "09:30", "11:30", "15:30", "18:30", "22:30"],
   "data_source": "live",
-  "loaded_at": "2026-10-24T12:00:00Z"
+  "fetched_at": "2026-10-24T12:00:00Z"
 }
 ```
 

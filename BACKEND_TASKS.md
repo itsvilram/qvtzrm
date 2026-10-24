@@ -38,7 +38,7 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 | 6 | [Decision-time forecast selection](#task-6--decision-time-forecast-selection) | 30 min | ✅ |
 | 7 | [Error metrics](#task-7--error-metrics) | 30 min | ✅ |
 | 8 | [DataStore (loading + cache)](#task-8--datastore-loading--cache) | 20 min | ✅ |
-| 9 | [API endpoints](#task-9--api-endpoints) | 35 min | ⬜ |
+| 9 | [API endpoints](#task-9--api-endpoints) | 35 min | ✅ |
 | 10 | [Check results against real data](#task-10--check-results-against-real-data) | 15 min | ⬜ |
 | 11 | [Dockerfile](#task-11--dockerfile) | 15 min | ⬜ |
 | | **Total** | **~3 h 40 min** (including reviews) | |
@@ -285,31 +285,37 @@ snapshot in 1.4 s; snapshot mode 0.13 s; analysis 72 ms first time, then 0 ms (c
 ---
 
 ## Task 9 – API endpoints
-**Status:** ⬜ · **Depends on:** 8
+**Status:** ✅ Done · **Depends on:** 8
 
-**Files:** `backend/app/schemas.py`, `backend/app/routes.py`, `backend/app/main.py`, `backend/tests/test_api.py`
+**Files:** `backend/app/schemas.py`, `backend/app/routes.py`, `backend/app/main.py`, `backend/tests/test_api.py`,
+`backend/requirements-dev.txt` (+ `httpx2` for the test client)
 
 **Steps**
-- [ ] `schemas.py`: Pydantic models for `Meta`, `DayAhead` (+ `DayAheadPoint`, `DayAheadSummary`) and
-      `Accuracy` (+ its parts), as specified in the plan
-- [ ] `routes.py`: `APIRouter(prefix="/api")` with:
-  - [ ] `GET /health`
-  - [ ] `GET /meta`
-  - [ ] `GET /day-ahead?decision_date&cutoff`
-  - [ ] `GET /accuracy?cutoff`
-- [ ] Validation: `decision_date` within Jan 1–31 and `cutoff` in `HH:MM` format, otherwise `422`
-- [ ] `DataUnavailableError` → `503`
-- [ ] `main.py`: create the app, add CORS from config, add the router, docs at `/api/docs`
-- [ ] The store is supplied through FastAPI's dependency injection (`Depends(get_store)`), so tests can replace it
+- [x] `schemas.py`: Pydantic models for `Meta`, `DayAhead` (+ `DayAheadPoint`, `DayAheadSummary`) and
+      `Accuracy` (+ its parts), as specified in the plan. Numbers are rounded to 1 decimal place in responses.
+- [x] `routes.py`: `APIRouter(prefix="/api")` with:
+  - [x] `GET /health`
+  - [x] `GET /meta`
+  - [x] `GET /day-ahead?decision_date&cutoff`
+  - [x] `GET /accuracy?cutoff`
+- [x] Validation: `decision_date` within Jan 1–31 and `cutoff` in `HH:MM` format, otherwise `422`
+- [x] `DataUnavailableError` → `503`
+- [x] `main.py`: create the app, add CORS from config, add the router, docs at `/api/docs`
+- [x] The store is supplied through FastAPI's dependency injection (`Depends(get_store)`), so tests can replace it
+- [x] Extra: `missing_forecast_hours` in `/day-ahead` and `/accuracy` (from the Task 6 finding);
+      frontend types in `FRONTEND_PLAN.md` §5 updated to match exactly
 
-**Tests** (`TestClient` + a fake store)
-- [ ] All 4 endpoints → 200, with responses matching the schemas
-- [ ] `decision_date=2026-02-15` → 422; `cutoff=9am` → 422
-- [ ] Store raises → 503
+**Tests** (`TestClient` + a store using sample data)
+- [x] All 4 endpoints → 200, with responses matching the schemas (exact values checked)
+- [x] `decision_date=2026-02-15` → 422; `cutoff=9am` → 422 (with clear messages)
+- [x] Store raises → 503
+- [x] Extra: an earlier cutoff uses an earlier forecast · a day without data returns an empty day ·
+      malformed or missing date → 422 · docs served
 
 **Done when**
-- [ ] All tests pass and ruff passes
-- [ ] `uvicorn app.main:app --reload` → `/api/docs` opens, and every endpoint works there against real data
+- [x] All tests pass and ruff passes (77 tests)
+- [x] Real server against live data: every endpoint works; responses take 17–43 ms (5–10 KB);
+      `/api/docs` opens; CORS allows `http://localhost:5173`
 
 **Review checklist**
 - Do the response fields exactly match `FRONTEND_PLAN.md` §5 (the types the frontend expects)?
@@ -369,3 +375,4 @@ snapshot in 1.4 s; snapshot mode 0.13 s; analysis 72 ms first time, then 0 ms (c
 | 6 – Forecast selection ⭐ | 2026-10-24 | ✅ Approved | 11 tests; real data at 09:00 = 744 h, all from the 07:30 forecast, 16.5–39.5 h ahead; row-by-row check 0 mismatches at 4 cutoffs; found that a 00:00 cutoff leaves 22:00–23:00 without a forecast (Task 9 must report the missing hours) |
 | 7 – Error metrics | 2026-10-24 | ✅ Approved (option A) | 13 tests; `by_horizon` changed to use all forecasts (MAE 1.69 GW at 0–6 h → 2.33 GW at 42–48 h); real data at 09:00: MAE 2.04 GW, bias +1.75 GW, buffer 4.1 GW; bias grows with wind level (likely curtailment, not confirmed) |
 | 8 – DataStore | 2026-10-24 | ✅ Approved | Loads once (lock, tested with 8 simultaneous requests); `auto` falls back to the snapshot (simulated Elexon outage tested); `analysis` and `horizon_stats` cached; `loaded_at` renamed `fetched_at`; 10 tests |
+| 9 – API endpoints | 2026-10-24 | ✅ Approved | 4 endpoints under `/api`; clear 422/503 messages; numbers rounded to 1 dp, NaN → null; `missing_forecast_hours` added; real server 17–43 ms per request; frontend types updated to match; 11 tests (77 total) |

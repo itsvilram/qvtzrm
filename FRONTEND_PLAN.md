@@ -163,27 +163,47 @@ frontend/
 
 ## 5. Data layer
 
-### Types (`api/types.ts`), matching the backend schemas
+### Types (`api/types.ts`), matching the backend schemas (`backend/app/schemas.py`)
+All numbers come rounded to 1 decimal place. Times are ISO-8601 UTC strings (`...Z`) and dates are `YYYY-MM-DD`.
 ```ts
 export interface Meta {
   decision_date_min: string; decision_date_max: string;
   default_cutoff: string; timezone: string;
-  publish_times_utc: string[]; data_source: "live" | "snapshot"; loaded_at: string;
+  publish_times_utc: string[]; data_source: "live" | "snapshot";
+  fetched_at: string;            // when the data was fetched from Elexon (snapshot date if snapshot)
 }
 export interface DayAheadPoint {
-  start_time: string; forecast_mw: number; actual_mw: number | null; error_mw: number | null;
-  band_low_mw: number; band_high_mw: number; publish_time: string; horizon_h: number;
+  start_time: string; publish_time: string; horizon_h: number;
+  forecast_mw: number; actual_mw: number | null; error_mw: number | null;
+  band_low_mw: number | null; band_high_mw: number | null;
 }
 export interface DayAhead {
   decision_date: string; delivery_date: string; cutoff: string;
   forecast_publish_times: string[];
-  summary: { forecast_energy_mwh: number; actual_energy_mwh: number | null;
-             peak_forecast_mw: number; min_forecast_mw: number;
+  summary: { forecast_energy_mwh: number;
+             actual_energy_mwh: number | null;   // null unless every hour has an actual
+             peak_forecast_mw: number | null; min_forecast_mw: number | null;
              mae_mw: number | null; bias_mw: number | null };
   points: DayAheadPoint[]; missing_forecast_hours: number; missing_actual_hours: number;
 }
-export interface Accuracy { /* summary, recommendation, by_hour, by_horizon, daily, histogram */ }
+interface ErrorStats { mae_mw: number; bias_mw: number; p10_mw: number; p90_mw: number; n: number }
+export interface Accuracy {
+  cutoff: string;
+  period: { delivery_from: string; delivery_to: string };
+  summary: { n_hours: number; mae_mw: number | null; rmse_mw: number | null; bias_mw: number | null;
+             nmae_pct: number | null; p10_mw: number | null; p50_mw: number | null;
+             p90_mw: number | null; p90_abs_mw: number | null;
+             max_over_mw: number | null; max_under_mw: number | null };
+  recommendation: { coverage: number; buffer_mw: number | null };
+  by_hour: (ErrorStats & { hour: number })[];
+  by_horizon: (ErrorStats & { bucket: string; bucket_start_h: number })[];   // all forecasts, ignores cutoff
+  daily: (ErrorStats & { delivery_date: string; forecast_energy_mwh: number; actual_energy_mwh: number })[];
+  histogram: { bin_start_mw: number; bin_end_mw: number; count: number }[];
+  missing_forecast_hours: number;   // e.g. 62 at cutoff 00:00
+}
 ```
+Error responses are `{ "detail": string }` for 422/503. FastAPI's own validation errors (e.g. a malformed
+date) send `detail` as a list of `{ msg }`, so `ApiError` should handle both.
 
 ### Client (`api/client.ts`)
 - `const BASE = import.meta.env.VITE_API_BASE_URL ?? ""`. Leaving it empty means the API is on the same address
