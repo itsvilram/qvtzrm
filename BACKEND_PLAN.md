@@ -189,7 +189,8 @@ Each is a pure function on DataFrames/Series, so it's easy to test.
 - **Snapshot**
   - `python -m app.snapshot` fetches the live data and writes the gzipped JSON backup files (~300 KB total)
   - The backup is committed to the repo, so demos, tests and Vercel cold starts never depend on Elexon being up
-  - Vercel (Docker too) uses `DATA_SOURCE=snapshot`, so first requests are fast; local development uses `auto`
+  - Vercel uses `DATA_SOURCE=snapshot`, so serverless cold starts are fast. Local development and Docker use
+    the default `auto`: live data when Elexon is reachable, and the snapshot when it isn't.
 
 ---
 

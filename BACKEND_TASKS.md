@@ -40,7 +40,7 @@ Step-by-step task list for building the backend. The design is in [BACKEND_PLAN.
 | 8 | [DataStore (loading + cache)](#task-8--datastore-loading--cache) | 20 min | ✅ |
 | 9 | [API endpoints](#task-9--api-endpoints) | 35 min | ✅ |
 | 10 | [Check results against real data](#task-10--check-results-against-real-data) | 15 min | ✅ |
-| 11 | [Dockerfile](#task-11--dockerfile) | 15 min | ⬜ |
+| 11 | [Dockerfile](#task-11--dockerfile) | 15 min | ✅ |
 | | **Total** | **~3 h 40 min** (including reviews) | |
 
 > The Vercel entry point (`api/index.py`, `vercel.json`) is built in the deployment phase, after the frontend.
@@ -361,21 +361,27 @@ snapshot in 1.4 s; snapshot mode 0.13 s; analysis 72 ms first time, then 0 ms (c
 ---
 
 ## Task 11 – Dockerfile
-**Status:** ⬜ · **Depends on:** 9
+**Status:** ✅ Done · **Depends on:** 9
 
 **Files:** `backend/Dockerfile`, `backend/.dockerignore`
 
 **Steps**
-- [ ] Based on `python:3.12-slim`; install `requirements.txt` only; copy `app/` and `data/`
-- [ ] Run as a non-root user; `EXPOSE 8000`; `HEALTHCHECK` on `/api/health`
-- [ ] `CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]`
-- [ ] `.dockerignore`: `.venv`, `tests`, `__pycache__`, `.pytest_cache`
+- [x] Based on `python:3.12-slim`; install `requirements.txt` only; copy `app/` and `data/`
+- [x] Run as a non-root user; `EXPOSE 8000`; `HEALTHCHECK` on `/api/health` (uses Python, as the slim image
+      has no curl)
+- [x] `CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]`
+- [x] `.dockerignore`: `.venv`, `tests`, `__pycache__`, `.pytest_cache` (+ `scripts`, `.ruff_cache`, dev requirements)
 
 **Done when**
-- [ ] `docker build -t wind-backend ./backend` succeeds
-- [ ] `docker run -p 8000:8000 -e DATA_SOURCE=snapshot wind-backend` → `/api/health` returns ok and
-      `/api/accuracy` returns data
-- [ ] Image size noted (aim for under 400 MB)
+- [x] `docker build -t wind-backend ./backend` succeeds (94 s on the first build)
+- [x] `docker run -p 8000:8000 -e DATA_SOURCE=snapshot wind-backend` → `/api/health` returns ok and
+      `/api/accuracy` returns data → also tested in the default `auto` mode (live Elexon from inside the
+      container); both give identical numbers
+- [x] Image size noted (aim for under 400 MB) → **323 MB** of files in the container (Docker Desktop
+      reports 442 MB because it also counts its own storage overhead); pandas + numpy are 145 MB of that
+
+**Also checked:** runs as `uid=10001(appuser)`; `/app` contains only `app/`, `data/`, `requirements.txt`; no
+pytest/ruff/httpx2 in the image; Docker healthcheck status `healthy`.
 
 **Review checklist**
 - Non-root user? No dev dependencies or tests in the image?
@@ -396,3 +402,4 @@ snapshot in 1.4 s; snapshot mode 0.13 s; analysis 72 ms first time, then 0 ms (c
 | 8 – DataStore | 2026-10-24 | ✅ Approved | Loads once (lock, tested with 8 simultaneous requests); `auto` falls back to the snapshot (simulated Elexon outage tested); `analysis` and `horizon_stats` cached; `loaded_at` renamed `fetched_at`; 10 tests |
 | 9 – API endpoints | 2026-10-24 | ✅ Approved | 4 endpoints under `/api`; clear 422/503 messages; numbers rounded to 1 dp, NaN → null; `missing_forecast_hours` added; real server 17–43 ms per request; frontend types updated to match; 11 tests (77 total) |
 | 10 – Real-data checks | 2026-10-24 | ✅ Approved | 3/3 spot checks match raw Elexon exactly (`scripts/spot_check.py`); headline: MAE 2.04 GW, bias +1.75 GW (85% of hours over-forecast), P90 buffer 4.1 GW, worst day 28 Jan (267 vs 138 GWh); 81% of actuals in band; idea for later: bias-corrected forecast line |
+| 11 – Dockerfile | 2026-10-24 | ✅ Approved | 323 MB of files; non-root; healthcheck `healthy`; no dev files in the image; snapshot and live (`auto`, now the Docker default) give identical results. **Backend complete: 11/11 tasks, 77 tests** |
