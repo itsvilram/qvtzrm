@@ -36,7 +36,7 @@ Same as the backend:
 | # | Task | Time | Status |
 |---|---|---|---|
 | 1 | [Project setup](#task-1--project-setup) | 15 min | ✅ |
-| 2 | [Styles, colours and number formats](#task-2--styles-colours-and-number-formats) | 15 min | ⬜ |
+| 2 | [Styles, colours and number formats](#task-2--styles-colours-and-number-formats) | 15 min | ✅ |
 | 3 | [API layer and URL state](#task-3--api-layer-and-url-state) | 20 min | ⬜ |
 | 4 | [App shell (header, tabs, loading/error states)](#task-4--app-shell) | 15 min | ⬜ |
 | 5 | [Day-ahead view](#task-5--day-ahead-view) | 40 min | ⬜ |
@@ -84,16 +84,18 @@ Same as the backend:
 ---
 
 ## Task 2 – Styles, colours and number formats
-**Status:** ⬜ · **Depends on:** 1
+**Status:** ✅ Done · **Depends on:** 1
 
-**Files:** `src/styles/global.css`, `src/lib/colors.ts`, `src/lib/format.ts`, `src/test/format.test.ts`
+**Files:** `src/styles/global.css`, `src/lib/colors.ts`, `src/lib/format.ts`, `src/test/format.test.ts`,
+`src/test/colors.test.ts`, `tsconfig.test.json` (tests get Node types; app code doesn't)
 
 **Steps**
-- [ ] `global.css`: CSS variables (colours, spacing, radius, fonts), a small reset, the page layout (content at
-      most 1200 px wide, 16 px side margins on phones), and the card style
-- [ ] `colors.ts`: the chart colours from FRONTEND_PLAN §6 in one place (forecast blue, actual slate, band,
-      over-forecast amber, under-forecast teal)
-- [ ] `format.ts`:
+- [x] `global.css`: CSS variables (colours, spacing, radius, fonts), a small reset, the page layout (content at
+      most 1200 px wide, 16 px side margins on phones), and the card style; **plus dark-mode values**
+- [x] `colors.ts`: the chart colours in one place. Changed from the plan's guesses to a **validated
+      palette** (forecast blue, actual orange, band light blue, over-forecast red, under-forecast blue),
+      checked with the palette validator in light and dark mode
+- [x] `format.ts`:
   - `formatPower`: below 10,000 MW → `9,350 MW`, otherwise → `14.2 GW`
   - `formatEnergy`: MWh in → `251 GWh` out
   - `formatSigned`: always shows a sign, with a real minus character (`+520 MW`, `−1.3 GW`)
@@ -101,9 +103,10 @@ Same as the backend:
   - `formatHoursAhead`: `16.5 h`
 
 **Tests**
-- [ ] MW/GW switch at 10,000 MW · GWh conversion · signs, including zero · UK time in winter and summer (BST)
+- [x] MW/GW switch at 10,000 MW · GWh conversion · signs, including zero · UK time in winter and summer (BST)
+- [x] Extra: every chart colour has a light and a dark value in `global.css`
 
-**Done when:** standard checks pass
+**Done when:** standard checks pass ✓ (23 tests)
 
 **Review checklist**
 - Are all colours defined once? Do the formats match the design (FRONTEND_PLAN §6)?
@@ -331,3 +334,4 @@ Same as the backend:
 | Task | Date | Result | Notes |
 |---|---|---|---|
 | 1 – Project setup | 2026-10-24 | ✅ Approved | Vite 8 + React 19 + TS 6, exact versions, 0 vulnerabilities; oxlint (template default) with `--deny-warnings`; Prettier; Vitest + Testing Library; Vite proxy to the backend verified |
+| 2 – Styles, colours, formats | 2026-10-24 | ✅ Approved | Validated palette (colour-blind ΔE 19–27, ≥ 3:1) in light and dark; dark mode included; formats with real minus sign and UK time (BST tested); separate test tsconfig; 23 tests |

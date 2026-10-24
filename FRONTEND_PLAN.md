@@ -230,15 +230,22 @@ January's data never changes, so turn off refetching when the window regains foc
 
 ## 6. Visual design
 
-**Colours** (in `lib/colors.ts` and CSS variables)
-| Use | Colour | Note |
-|---|---|---|
-| Forecast | blue `#2563eb` | Solid line, 2 px |
-| Actual | dark slate `#0f172a` | Dashed line, so it still reads in black and white |
-| Typical range (P10–P90) | light blue `#2563eb` at 15% opacity | Area behind the forecast |
-| Over-forecast (risk of buying too little) | amber `#d97706` | Histogram bars, positive bias |
-| Under-forecast | teal `#0d9488` | Histogram bars, negative bias |
-| Page and cards | white cards on `#f8fafc`, 1 px `#e2e8f0` border, 12 px rounded corners | Clean, business look |
+**Colours** (defined once as CSS variables in `styles/global.css`; `lib/colors.ts` maps them to chart roles)
+
+From a validated data-viz palette: both pairs that appear together were checked with the palette validator
+(colour-blind separation ΔE 19–27 against a target of ≥ 8, lightness band, ≥ 3:1 contrast) in light **and**
+dark mode.
+
+| Use | Light | Dark | Note |
+|---|---|---|---|
+| Forecast | blue `#2a78d6` | `#3987e5` | Categorical slot 1; solid line, 2 px |
+| Actual | orange `#eb6834` | `#d95926` | Categorical slot 2; dashed line, so it also reads without colour |
+| Typical range (P10–P90) | light blue `#cde2fb` | `#104281` | Light step of the forecast's blue; area behind the forecast |
+| Over-forecast (risk of buying too little) | red `#e34948` | `#e66767` | Diverging pair, positive error |
+| Under-forecast | blue `#2a78d6` | `#3987e5` | Diverging pair, negative error; grey midpoint `#f0efec` |
+| Page / cards | page `#f9f9f7`, cards `#fcfcfb`, hairline border, 12 px corners | page `#0d0d0d`, cards `#1a1a19` | Text: `#0b0b0b` / `#52514e` / muted `#898781` |
+
+Dark mode follows the operating-system setting (`prefers-color-scheme`).
 
 **Number formats** (`lib/format.ts`)
 - Power: below 10,000 MW → `9,350 MW`; otherwise → `14.2 GW`
