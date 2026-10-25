@@ -10,7 +10,7 @@ frontend: one task at a time → checks → review → ✅, commit, push.
 | 1 | [Vercel configuration in the repo](#task-1--vercel-configuration-in-the-repo) | Claude | 30 min | ✅ |
 | 2 | [Deploy on Vercel and check the live site](#task-2--deploy-on-vercel-and-check-the-live-site) | **You** + Claude | 15 min | ✅ |
 | 3 | [README](#task-3--readme) | Claude | 30 min | ✅ |
-| 4 | [Automated checks on GitHub (CI)](#task-4--automated-checks-on-github-ci) | Claude | 20 min | ⬜ |
+| 4 | [Automated checks on GitHub (CI)](#task-4--automated-checks-on-github-ci) | Claude | 20 min | 👀 |
 | 5 | [Video script](#task-5--video-script) | Claude writes, **you** record | 30 min + recording | ⬜ |
 | 6 | [Submission](#task-6--submission) | **You** | 15 min | ⬜ |
 
@@ -71,7 +71,13 @@ AI tools were used. Also: what the app does (with screenshots), architecture, th
 headline results, assumptions and limitations, how it was tested.
 
 ## Task 4 – Automated checks on GitHub (CI)
-**Status:** ⬜ · **Who:** Claude
+**Status:** 👀 In review · **Who:** Claude
+
+Done: `.github/workflows/ci.yml` with 3 parallel jobs on every push to `main` and every pull request:
+backend (ruff lint + format incl. `main.py`, pytest), frontend (oxlint, Prettier, Vitest, type-checked build),
+Docker (builds both images). Uses the current action versions (checkout/setup-python/setup-node v7), pip and
+npm caches, and read-only permissions; a newer push cancels an older run. CI badge added to the README.
+**Still to prove:** a green run on GitHub, which needs the push.
 
 GitHub Actions on every push: backend (`ruff`, `pytest`) and frontend (`lint`, `format:check`, `test`, `build`).
 A green badge in the README.

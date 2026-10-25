@@ -1,5 +1,7 @@
 # Wind Forecast Monitor
 
+[![CI](https://github.com/itsvilram/qvtzrm/actions/workflows/ci.yml/badge.svg)](https://github.com/itsvilram/qvtzrm/actions/workflows/ci.yml)
+
 A web app for a GB energy supplier's day-ahead trading desk. It shows the **national wind forecast that was
 available when each purchase decision had to be made**, and measures **how accurate those forecasts were**, so
 traders can plan with a quantified margin of error.
@@ -187,6 +189,10 @@ Independent spot check of API values against raw Elexon JSON: `cd backend && pyt
 ---
 
 ## Quality and testing
+
+Every push and pull request runs the checks below in GitHub Actions
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)): backend lint, formatting and tests; frontend lint,
+formatting, tests and type-checked build; and a build of both Docker images.
 
 - **Backend:** 78 pytest tests cover the Elexon client (with a fake server), forecast selection (cutoff
   boundaries, late publishes, missing hours, UK summer time), metrics, data loading and fallback, and every API
