@@ -243,7 +243,7 @@ dark mode.
 | Typical range (P10–P90) | light blue `#cde2fb` | `#104281` | Light step of the forecast's blue; area behind the forecast |
 | Over-forecast (risk of buying too little) | red `#e34948` | `#e66767` | Diverging pair, positive error |
 | Under-forecast | blue `#2a78d6` | `#3987e5` | Diverging pair, negative error; grey midpoint `#f0efec` |
-| Page / cards | page `#f9f9f7`, cards `#fcfcfb`, hairline border, 12 px corners | page `#0d0d0d`, cards `#1a1a19` | Text: `#0b0b0b` / `#52514e` / muted `#898781` |
+| Page / cards | page `#f9f9f7`, cards `#fcfcfb`, hairline border, 12 px corners | page `#0d0d0d`, cards `#1a1a19` | Text: `#0b0b0b` / `#52514e` / muted `#6f6e69` (darkened from the palette's `#898781` to meet WCAG AA 4.5:1) |
 
 Dark mode follows the operating-system setting (`prefers-color-scheme`).
 

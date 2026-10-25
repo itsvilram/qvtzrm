@@ -13,6 +13,7 @@ import {
   axisLine,
   axisTick,
   barCursor,
+  categoryTicks,
   gigawattTick,
   MAX_BAR_PX,
   MIN_RELIABLE_HOURS,
@@ -57,7 +58,13 @@ export function HorizonChart({ byHorizon }: { byHorizon: HorizonStats[] }) {
         aria-label={`Average miss by hours ahead.${nearest && furthest ? ` ${formatPower(nearest.mae_mw)} at ${bucketLabel(nearest.bucket)} ahead, ${formatPower(furthest.mae_mw)} at ${bucketLabel(furthest.bucket)} ahead.` : ''} Full values in the table below.`}
       >
         <CartesianGrid vertical={false} stroke={chartColors.grid} />
-        <XAxis dataKey="bucket" interval={1} tick={axisTick} tickLine={false} axisLine={axisLine} />
+        <XAxis
+          dataKey="bucket"
+          {...categoryTicks}
+          tick={axisTick}
+          tickLine={false}
+          axisLine={axisLine}
+        />
         <YAxis
           width={56}
           domain={[0, 'auto']}

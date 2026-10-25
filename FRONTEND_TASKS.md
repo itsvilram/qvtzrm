@@ -41,7 +41,7 @@ Same as the backend:
 | 4 | [App shell (header, tabs, loading/error states)](#task-4--app-shell) | 15 min | ✅ |
 | 5 | [Day-ahead view](#task-5--day-ahead-view) | 40 min | ✅ |
 | 6 | [Forecast accuracy view](#task-6--forecast-accuracy-view) | 45 min | ✅ |
-| 7 | [Responsive layout, accessibility, polish](#task-7--responsive-layout-accessibility-polish) | 15 min | ⬜ |
+| 7 | [Responsive layout, accessibility, polish](#task-7--responsive-layout-accessibility-polish) | 15 min | ✅ |
 | 8 | [Docker + docker compose (full stack)](#task-8--docker--docker-compose) | 20 min | ⬜ |
 | 9 | [End-to-end check in the browser](#task-9--end-to-end-check-in-the-browser) | 15 min | ⬜ |
 | | **Total** | **~3 h 20 min** (including reviews) | |
@@ -294,19 +294,28 @@ Same as the backend:
 ---
 
 ## Task 7 – Responsive layout, accessibility, polish
-**Status:** ⬜ · **Depends on:** 6
+**Status:** ✅ Done · **Depends on:** 6
+
+**How it was checked:** a Playwright script opens both views at 375, 768 and 1280 px (light) and 1280 px (dark),
+measures sideways scrolling, runs **axe-core** (WCAG 2.2 A/AA + best practice) and records console messages.
 
 **Steps**
-- [ ] Check at **375 px** (phone), **768 px** (tablet) and **1280 px** (laptop): cards wrap, charts stack, no
-      sideways scrolling
-- [ ] Every chart has an `aria-label` summary; every input has a label; focus outlines are visible
-- [ ] ⓘ tooltips open on keyboard focus as well as hover
-- [ ] Page title and favicon; consistent spacing and number formats everywhere
-- [ ] No warnings or errors in the browser console
+- [x] Check at **375 px** (phone), **768 px** (tablet) and **1280 px** (laptop): cards wrap, charts stack, no
+      sideways scrolling. Fixed: two cards per row on phones (was one); axis labels now space themselves to
+      fit the width (they collided on phones); ⓘ tooltips caused sideways scrolling once cards sat side by
+      side, so they now stay inside their card
+- [x] Every chart has an `aria-label` summary; every input has a label; focus outlines are visible
+- [x] Fixed (axe, serious): muted text was 3.5:1 contrast in light mode; now `#6f6e69`, 4.85:1+ (WCAG AA)
+- [x] Fixed (axe, moderate): the tab bar was outside the `<main>` landmark
+- [x] ⓘ tooltips open on keyboard focus as well as hover
+- [x] Page title and favicon (wind icon instead of the Vite logo); consistent spacing and number formats
+- [x] No warnings or errors in the browser console
+- [x] Extra: the pages load on demand, so the charting library is a separate download; first load is 83 KB
+      gzipped (was 188 KB) and the bundle-size warning is gone
 
 **Done when**
-- [ ] Standard checks pass
-- [ ] Screenshots at the 3 widths in the review
+- [x] Standard checks pass (63 tests)
+- [x] Screenshots at the 3 widths in the review; axe: **0 violations** in all 8 checks
 
 **Review checklist**
 - Would this look good on a projector during the client demo? And on a phone?
@@ -371,3 +380,4 @@ Same as the backend:
 | 4 – App shell | 2026-10-24 | ✅ Approved | Header with Live/Snapshot badge and visible fetch time; keyboard tabs kept in the URL; loading/error/empty states; screenshots caught an unhelpful 502 message and a CSS order bug (both fixed); 47 tests |
 | 5 – Day-ahead view | 2026-10-24 | ✅ Approved | Controls, info line, 4 cards, forecast/band/actual chart with crosshair tooltip and table view, actuals toggle; checked in Chrome via Playwright on real data (Jan 27: 267 vs 138 GWh; 09:50 → 09:30 forecast; no console errors); fixed mixed units in ranges; 54 tests |
 | 6 – Accuracy view | 2026-10-24 | ✅ Approved | Recommendation (4.1 GW, 85% over-forecast), 5 cards with ⓘ, 4 charts with tooltips and tables; click a day → day-ahead (28 Jan → decision 27 Jan) verified in Chrome; hour-chart bars lightened so dots show; 63 tests |
+| 7 – Responsive, a11y, polish | 2026-10-25 | ✅ Approved | Audited at 375/768/1280 px light + dark with axe-core: fixed text contrast (WCAG AA), landmark, phone card layout, colliding axis labels, ⓘ overflow; now 0 violations, no sideways scroll; pages lazy-loaded (first load 83 KB gzipped); favicon |

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { lazy, Suspense, useMemo } from 'react'
 import { useMeta } from './api/hooks.ts'
 import type { Meta } from './api/types.ts'
 import styles from './App.module.css'
@@ -8,9 +8,15 @@ import { Footer } from './components/layout/Footer.tsx'
 import { Header } from './components/layout/Header.tsx'
 import { TabPanel, Tabs } from './components/layout/Tabs.tsx'
 import { CUTOFF_VALUES } from './lib/cutoffs.ts'
-import { AccuracyPage } from './pages/AccuracyPage.tsx'
-import { DayAheadPage } from './pages/DayAheadPage.tsx'
 import { type UrlLimits, useUrlState } from './state/useUrlState.ts'
+
+// The pages (and the charting library they use) load separately, so the header shows sooner.
+const DayAheadPage = lazy(() =>
+  import('./pages/DayAheadPage.tsx').then((module) => ({ default: module.DayAheadPage })),
+)
+const AccuracyPage = lazy(() =>
+  import('./pages/AccuracyPage.tsx').then((module) => ({ default: module.AccuracyPage })),
+)
 
 function App() {
   const meta = useMeta()
@@ -49,12 +55,10 @@ function Dashboard({ meta }: { meta: Meta }) {
   const [state, update] = useUrlState(limits)
 
   return (
-    <>
-      <div className="container">
-        <Tabs active={state.tab} onChange={(tab) => update({ tab })} />
-      </div>
-      <main className="container">
-        <TabPanel tab={state.tab}>
+    <main className="container stack">
+      <Tabs active={state.tab} onChange={(tab) => update({ tab })} />
+      <TabPanel tab={state.tab}>
+        <Suspense fallback={<LoadingState />}>
           {state.tab === 'day-ahead' ? (
             <DayAheadPage
               date={state.date}
@@ -66,9 +70,9 @@ function Dashboard({ meta }: { meta: Meta }) {
           ) : (
             <AccuracyPage cutoff={state.cutoff} onChange={update} />
           )}
-        </TabPanel>
-      </main>
-    </>
+        </Suspense>
+      </TabPanel>
+    </main>
   )
 }
 

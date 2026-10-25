@@ -4,6 +4,9 @@ import { chartColors } from './colors.ts'
 export const axisTick = { fill: chartColors.label }
 export const axisLine = { stroke: chartColors.axis }
 
+/** Category labels evenly spaced to fit the chart's width (every 2 h on a laptop, every 6 h on a phone). */
+export const categoryTicks = { interval: 'equidistantPreserveStart', minTickGap: 16 } as const
+
 /** Bars are at most 24 px wide; the rest of the slot stays empty. */
 export const MAX_BAR_PX = 24
 

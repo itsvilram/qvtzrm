@@ -10,7 +10,14 @@ import {
   YAxis,
 } from 'recharts'
 import type { HourStats } from '../../api/types.ts'
-import { axisLine, axisTick, barCursor, gigawattTick, MAX_BAR_PX } from '../../lib/chartStyle.ts'
+import {
+  axisLine,
+  axisTick,
+  barCursor,
+  categoryTicks,
+  gigawattTick,
+  MAX_BAR_PX,
+} from '../../lib/chartStyle.ts'
 import { chartColors } from '../../lib/colors.ts'
 import { formatPower, formatPowerRange, formatSigned } from '../../lib/format.ts'
 import {
@@ -73,7 +80,13 @@ export function ErrorByHourChart({ byHour }: { byHour: HourStats[] }) {
         aria-label={`Forecast error by hour of day. ${summarise(byHour)} Full values in the table below.`}
       >
         <CartesianGrid vertical={false} stroke={chartColors.grid} />
-        <XAxis dataKey="hour" interval={2} tick={axisTick} tickLine={false} axisLine={axisLine} />
+        <XAxis
+          dataKey="hour"
+          {...categoryTicks}
+          tick={axisTick}
+          tickLine={false}
+          axisLine={axisLine}
+        />
         <YAxis
           width={56}
           tickFormatter={gigawattTick}

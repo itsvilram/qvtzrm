@@ -1,4 +1,5 @@
 .card {
+  position: relative; /* anchors the ⓘ tooltip */
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -23,4 +24,15 @@
 .detail {
   color: var(--text-muted);
   font-size: 0.8125rem;
+}
+
+/* Two cards share a row on phones, so values get a little smaller. */
+@media (max-width: 600px) {
+  .card {
+    padding: var(--space-3);
+  }
+
+  .value {
+    font-size: 1.25rem;
+  }
 }

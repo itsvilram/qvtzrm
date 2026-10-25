@@ -11,7 +11,8 @@
   --surface: #fcfcfb;
   --text-primary: #0b0b0b;
   --text-secondary: #52514e;
-  --text-muted: #898781;
+  /* Darker than the palette's #898781 so small text meets WCAG AA (4.85:1 on the page, 4.98:1 on cards). */
+  --text-muted: #6f6e69;
   --grid: #e1e0d9;
   --axis: #c3c2b7;
   --border: rgba(11, 11, 11, 0.1);
@@ -144,9 +145,10 @@ select {
   border-color: var(--axis);
 }
 
+/* Two cards per row even on a phone; more as the screen widens. */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
   gap: var(--space-3);
 }
 
