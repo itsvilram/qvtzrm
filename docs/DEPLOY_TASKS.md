@@ -8,8 +8,8 @@ frontend: one task at a time → checks → review → ✅, commit, push.
 | # | Task | Who | Time | Status |
 |---|---|---|---|---|
 | 1 | [Vercel configuration in the repo](#task-1--vercel-configuration-in-the-repo) | Claude | 30 min | ✅ |
-| 2 | [Deploy on Vercel and check the live site](#task-2--deploy-on-vercel-and-check-the-live-site) | **You** + Claude | 15 min | 👀 |
-| 3 | [README](#task-3--readme) | Claude | 30 min | ⬜ |
+| 2 | [Deploy on Vercel and check the live site](#task-2--deploy-on-vercel-and-check-the-live-site) | **You** + Claude | 15 min | ✅ |
+| 3 | [README](#task-3--readme) | Claude | 30 min | ✅ |
 | 4 | [Automated checks on GitHub (CI)](#task-4--automated-checks-on-github-ci) | Claude | 20 min | ⬜ |
 | 5 | [Video script](#task-5--video-script) | Claude writes, **you** record | 30 min + recording | ⬜ |
 | 6 | [Submission](#task-6--submission) | **You** | 15 min | ⬜ |
@@ -54,11 +54,17 @@ single project.)
 - [x] The end-to-end demo script passes against the production URL → **13/13**; axe 0 violations; 28 Jan click
       works; no failed requests or console errors; `data_source: snapshot`; 0.3–0.5 s per request
 - [x] Only the production URL is used from now on (preview URLs may need a Vercel login)
-- [ ] Follow-up in `vercel.json`: cache built JS/CSS for a year (Vercel served them with `max-age=0`) and add the
-      same `nosniff` / `Referrer-Policy` headers as Nginx. Check again after the redeploy
+- [x] Follow-up in `vercel.json`: cache built JS/CSS for a year (Vercel served them with `max-age=0`) and add the
+      same `nosniff` / `Referrer-Policy` headers as Nginx. Check again after the redeploy → redeployed
+      automatically in ~50 s; assets `immutable`, page still revalidates, headers on page and API; demo 13/13
 
 ## Task 3 – README
-**Status:** ⬜ · **Who:** Claude
+**Status:** ✅ Done · **Who:** Claude
+
+Done: `README.md` with the live link, screenshots, headline results, how it works (data, selection rule,
+architecture, API), how to start (Docker / direct / tests / configuration), files and directories, quality and
+testing, assumptions and limitations, and the AI-use note. All links checked. The planning and task files moved
+from the repo root to `docs/` (their links to each other still work).
 
 What the brief requires: files and directories, how to start the application, the Vercel link, and a note that
 AI tools were used. Also: what the app does (with screenshots), architecture, the forecast-selection rule,
@@ -92,3 +98,5 @@ A green badge in the README.
 | Task | Date | Result | Notes |
 |---|---|---|---|
 | 1 – Vercel configuration | 2026-10-25 | ✅ Approved | `main.py` entry (snapshot by default, frontend via `app.frontend`), root `requirements.txt` (pins checked by a test), `vercel.json`; local single-process run passes the demo walk-through 13/13; function ~173 MB of 500 MB |
+| 2 – Deploy on Vercel | 2026-10-25 | ✅ Done | Live at https://qvtzrm.vercel.app (root `app` imported as a single FastAPI project); no login needed; demo 13/13, axe 0, no errors; cache + security headers added and verified after auto-redeploy |
+| 3 – README | 2026-10-25 | ✅ Approved | All four brief requirements (files/dirs, how to start, Vercel link, AI-use note, wording approved) plus results, rule, architecture, API, testing, limitations; links checked; planning files moved to `docs/` |
