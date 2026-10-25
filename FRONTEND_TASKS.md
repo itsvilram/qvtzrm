@@ -43,7 +43,7 @@ Same as the backend:
 | 6 | [Forecast accuracy view](#task-6--forecast-accuracy-view) | 45 min | ✅ |
 | 7 | [Responsive layout, accessibility, polish](#task-7--responsive-layout-accessibility-polish) | 15 min | ✅ |
 | 8 | [Docker + docker compose (full stack)](#task-8--docker--docker-compose) | 20 min | ✅ |
-| 9 | [End-to-end check in the browser](#task-9--end-to-end-check-in-the-browser) | 15 min | ⬜ |
+| 9 | [End-to-end check in the browser](#task-9--end-to-end-check-in-the-browser) | 15 min | ✅ |
 | | **Total** | **~3 h 20 min** (including reviews) | |
 
 > After the frontend: a short **deployment and submission** phase (Vercel, README, CI on GitHub, video script),
@@ -358,17 +358,29 @@ measures sideways scrolling, runs **axe-core** (WCAG 2.2 A/AA + best practice) a
 ---
 
 ## Task 9 – End-to-end check in the browser
-**Status:** ⬜ · **Depends on:** 8
+**Status:** ✅ Done · **Depends on:** 8
 
 **Steps**
-- [ ] Run the full stack (`docker compose up`) and walk through the **demo script** (FRONTEND_PLAN §12) step by step
-- [ ] Compare the numbers on screen with the API and the headline numbers (BACKEND_TASKS, Task 10)
-- [ ] Check the browser console for errors and the network tab for failed requests
-- [ ] Save screenshots for the README and the video
+- [x] Run the full stack (`docker compose up`) and walk through the **demo script** (FRONTEND_PLAN §12) step by step
+      (Playwright driving Chrome against http://localhost:8080)
+- [x] Compare the numbers on screen with the API and the headline numbers (BACKEND_TASKS, Task 10)
+      → the script reads the API's own JSON and checks the formatted value is on screen: **13/13 match**
+- [x] Check the browser console for errors and the network tab for failed requests → none
+- [x] Save screenshots for the README and the video
+
+**Demo walk-through results**
+| Step | What happens | Checked against the API |
+|---|---|---|
+| 1 | Day-ahead, decision 31 Jan at 09:00, actuals **off** (what the trader saw) | 171 GWh forecast for Sun 1 Feb; actual card hidden ✓ |
+| 2–3 | Shaded range, then actuals **on** | 148 GWh actual ✓ |
+| 4 | Forecast accuracy: recommendation | MAE 2,039 MW, bias +1,748 MW, nMAE 18.1%, "Plan for about 4.1 GW less wind", 744 hours ✓ |
+| 5a | Click 28 Jan in the daily chart | Opens decision 27 Jan → Wed 28 Jan: 267 vs 138 GWh ✓ |
+| 5b | Later cutoff (12:00) | MAE improves 2,039 → 1,901 MW ✓ |
 
 **Done when**
-- [ ] Every demo step works; the numbers match; no console errors
-- [ ] Screenshots saved in `docs/screenshots/`
+- [x] Every demo step works; the numbers match; no console errors
+- [x] Screenshots saved in `docs/screenshots/` (7 files, ~540 KB): day-ahead at decision time, with actuals,
+      chart tooltip, forecast accuracy (full page), worst day 28 Jan, phone, dark mode
 
 **Review checklist**
 - Is the demo ready to record?
@@ -387,3 +399,4 @@ measures sideways scrolling, runs **axe-core** (WCAG 2.2 A/AA + best practice) a
 | 6 – Accuracy view | 2026-10-24 | ✅ Approved | Recommendation (4.1 GW, 85% over-forecast), 5 cards with ⓘ, 4 charts with tooltips and tables; click a day → day-ahead (28 Jan → decision 27 Jan) verified in Chrome; hour-chart bars lightened so dots show; 63 tests |
 | 7 – Responsive, a11y, polish | 2026-10-25 | ✅ Approved | Audited at 375/768/1280 px light + dark with axe-core: fixed text contrast (WCAG AA), landmark, phone card layout, colliding axis labels, ⓘ overflow; now 0 violations, no sideways scroll; pages lazy-loaded (first load 83 KB gzipped); favicon |
 | 8 – Docker compose | 2026-10-25 | ✅ Approved | One command (`docker compose up --build`) → :8080; non-root Nginx 1.30 + backend, frontend waits for healthy backend; caching/gzip/security headers; e2e on :8080 clean (axe 0, no failed requests); frontend image 91 MB |
+| 9 – End-to-end check | 2026-10-25 | ✅ Approved | Demo script walked on the Docker stack; 13/13 on-screen numbers match the API; no failed requests or console errors; 7 screenshots in `docs/screenshots/`. **Frontend complete: 9/9 tasks, 63 tests** |
