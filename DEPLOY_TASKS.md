@@ -8,7 +8,7 @@ frontend: one task at a time → checks → review → ✅, commit, push.
 | # | Task | Who | Time | Status |
 |---|---|---|---|---|
 | 1 | [Vercel configuration in the repo](#task-1--vercel-configuration-in-the-repo) | Claude | 30 min | ✅ |
-| 2 | [Deploy on Vercel and check the live site](#task-2--deploy-on-vercel-and-check-the-live-site) | **You** + Claude | 15 min | ⬜ |
+| 2 | [Deploy on Vercel and check the live site](#task-2--deploy-on-vercel-and-check-the-live-site) | **You** + Claude | 15 min | 👀 |
 | 3 | [README](#task-3--readme) | Claude | 30 min | ⬜ |
 | 4 | [Automated checks on GitHub (CI)](#task-4--automated-checks-on-github-ci) | Claude | 20 min | ⬜ |
 | 5 | [Video script](#task-5--video-script) | Claude writes, **you** record | 30 min + recording | ⬜ |
@@ -46,10 +46,16 @@ FastAPI's `app.frontend()` (supported by FastAPI 0.162 and Vercel's FastAPI pres
 2. **Add New → Project** → import `qvtzrm` (give access to that repo only) → keep the detected settings → **Deploy**
 3. Send Claude the production URL (e.g. `https://qvtzrm.vercel.app`)
 
+**Live at: https://qvtzrm.vercel.app** (Vercel detected three apps; the root `app` (FastAPI, `/`) was imported as a
+single project.)
+
 **Done when**
-- [ ] The production URL opens in an **incognito** window (no login)
-- [ ] The end-to-end demo script passes against the production URL
-- [ ] Only the production URL is used from now on (preview URLs may need a Vercel login)
+- [x] The production URL opens in an **incognito** window (no login) → checked with a fresh browser (no cookies)
+- [x] The end-to-end demo script passes against the production URL → **13/13**; axe 0 violations; 28 Jan click
+      works; no failed requests or console errors; `data_source: snapshot`; 0.3–0.5 s per request
+- [x] Only the production URL is used from now on (preview URLs may need a Vercel login)
+- [ ] Follow-up in `vercel.json`: cache built JS/CSS for a year (Vercel served them with `max-age=0`) and add the
+      same `nosniff` / `Referrer-Policy` headers as Nginx. Check again after the redeploy
 
 ## Task 3 – README
 **Status:** ⬜ · **Who:** Claude
