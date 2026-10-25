@@ -42,7 +42,7 @@ Same as the backend:
 | 5 | [Day-ahead view](#task-5--day-ahead-view) | 40 min | ✅ |
 | 6 | [Forecast accuracy view](#task-6--forecast-accuracy-view) | 45 min | ✅ |
 | 7 | [Responsive layout, accessibility, polish](#task-7--responsive-layout-accessibility-polish) | 15 min | ✅ |
-| 8 | [Docker + docker compose (full stack)](#task-8--docker--docker-compose) | 20 min | ⬜ |
+| 8 | [Docker + docker compose (full stack)](#task-8--docker--docker-compose) | 20 min | ✅ |
 | 9 | [End-to-end check in the browser](#task-9--end-to-end-check-in-the-browser) | 15 min | ⬜ |
 | | **Total** | **~3 h 20 min** (including reviews) | |
 
@@ -323,29 +323,34 @@ measures sideways scrolling, runs **axe-core** (WCAG 2.2 A/AA + best practice) a
 ---
 
 ## Task 8 – Docker + docker compose
-**Status:** ⬜ · **Depends on:** 7
+**Status:** ✅ Done · **Depends on:** 7
 
 **Files**
 - `frontend/Dockerfile`, `frontend/nginx.conf`, `frontend/.dockerignore`
 - `docker-compose.yml` (repo root)
 
 **Steps**
-- [ ] `frontend/Dockerfile`, in two stages:
-  1. `node:24-alpine`: `npm ci && npm run build`
-  2. `nginxinc/nginx-unprivileged:alpine` (runs as non-root, port 8080): serves `dist/`
-- [ ] `nginx.conf`:
-  - forwards `/api/` → `http://backend:8000`
-  - unknown paths fall back to `index.html`
-  - built JS/CSS files are cached long-term
-  - gzip on
-- [ ] `docker-compose.yml`:
-  - `backend` service (with its healthcheck)
+- [x] `frontend/Dockerfile`, in two stages:
+  1. `node:24-alpine` (Node 24.22): `npm ci && npm run build` (dependencies cached in their own layer)
+  2. `nginxinc/nginx-unprivileged:1.30-alpine` (nginx 1.30.6, runs as non-root, port 8080): serves `dist/`;
+     healthcheck with `wget`
+- [x] `nginx.conf`:
+  - forwards `/api/` → `http://backend:8000` (the `/api` prefix is kept, so `/api/docs` works too)
+  - unknown paths fall back to `index.html`, which is never cached
+  - built JS/CSS files are cached for a year (`immutable`)
+  - gzip on; `X-Content-Type-Options` and `Referrer-Policy` headers
+- [x] `docker-compose.yml`:
+  - `backend` service (with its healthcheck); not published to the host, only reachable through Nginx
   - `frontend` service that waits until the backend is healthy
-  - port **8080**
+  - port **8080**; project name `wind-forecast-monitor`; `DATA_SOURCE` can be overridden (default `auto`)
 
 **Done when**
-- [ ] `docker compose up --build` → http://localhost:8080 shows the app with real data; `/api` works through Nginx
-- [ ] Image sizes noted; both containers run as non-root
+- [x] `docker compose up --build` → http://localhost:8080 shows the app with real data; `/api` works through Nginx
+      → first build + start 52 s; backend healthy before the frontend starts; Playwright on :8080: 267 vs
+      138 GWh, recommendation 4.1 GW, 28 Jan bar → decision 27 Jan, axe 0 violations, no failed requests or
+      console errors
+- [x] Image sizes noted; both containers run as non-root → frontend image **91 MB** (708 KB of app files),
+      backend 323 MB of files; users `nginx` and `appuser`
 
 **Review checklist**
 - Is the one-command start simple enough for the README? Are the containers non-root?
@@ -381,3 +386,4 @@ measures sideways scrolling, runs **axe-core** (WCAG 2.2 A/AA + best practice) a
 | 5 – Day-ahead view | 2026-10-24 | ✅ Approved | Controls, info line, 4 cards, forecast/band/actual chart with crosshair tooltip and table view, actuals toggle; checked in Chrome via Playwright on real data (Jan 27: 267 vs 138 GWh; 09:50 → 09:30 forecast; no console errors); fixed mixed units in ranges; 54 tests |
 | 6 – Accuracy view | 2026-10-24 | ✅ Approved | Recommendation (4.1 GW, 85% over-forecast), 5 cards with ⓘ, 4 charts with tooltips and tables; click a day → day-ahead (28 Jan → decision 27 Jan) verified in Chrome; hour-chart bars lightened so dots show; 63 tests |
 | 7 – Responsive, a11y, polish | 2026-10-25 | ✅ Approved | Audited at 375/768/1280 px light + dark with axe-core: fixed text contrast (WCAG AA), landmark, phone card layout, colliding axis labels, ⓘ overflow; now 0 violations, no sideways scroll; pages lazy-loaded (first load 83 KB gzipped); favicon |
+| 8 – Docker compose | 2026-10-25 | ✅ Approved | One command (`docker compose up --build`) → :8080; non-root Nginx 1.30 + backend, frontend waits for healthy backend; caching/gzip/security headers; e2e on :8080 clean (axe 0, no failed requests); frontend image 91 MB |

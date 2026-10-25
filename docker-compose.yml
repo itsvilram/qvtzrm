@@ -1,0 +1,20 @@
+# Full stack: `docker compose up --build`, then open http://localhost:8080
+# (API docs: http://localhost:8080/api/docs).
+name: wind-forecast-monitor
+
+services:
+  backend:
+    build: ./backend
+    environment:
+      # auto = live Elexon data, falling back to the saved snapshot if Elexon can't be reached.
+      DATA_SOURCE: ${DATA_SOURCE:-auto}
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
