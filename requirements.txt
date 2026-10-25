@@ -1,0 +1,6 @@
+# Python packages for the Vercel deployment: the backend's runtime packages with the same pins
+# as backend/requirements.txt (a backend test checks they match). No uvicorn: Vercel runs the app.
+fastapi==0.162.0
+httpx==0.28.1
+pandas==3.1.0
+tzdata==2026.5
