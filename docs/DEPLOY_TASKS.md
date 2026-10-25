@@ -10,7 +10,7 @@ frontend: one task at a time → checks → review → ✅, commit, push.
 | 1 | [Vercel configuration in the repo](#task-1--vercel-configuration-in-the-repo) | Claude | 30 min | ✅ |
 | 2 | [Deploy on Vercel and check the live site](#task-2--deploy-on-vercel-and-check-the-live-site) | **You** + Claude | 15 min | ✅ |
 | 3 | [README](#task-3--readme) | Claude | 30 min | ✅ |
-| 4 | [Automated checks on GitHub (CI)](#task-4--automated-checks-on-github-ci) | Claude | 20 min | 👀 |
+| 4 | [Automated checks on GitHub (CI)](#task-4--automated-checks-on-github-ci) | Claude | 20 min | ✅ |
 | 5 | [Video script](#task-5--video-script) | Claude writes, **you** record | 30 min + recording | ⬜ |
 | 6 | [Submission](#task-6--submission) | **You** | 15 min | ⬜ |
 
@@ -71,13 +71,13 @@ AI tools were used. Also: what the app does (with screenshots), architecture, th
 headline results, assumptions and limitations, how it was tested.
 
 ## Task 4 – Automated checks on GitHub (CI)
-**Status:** 👀 In review · **Who:** Claude
+**Status:** ✅ Done · **Who:** Claude
 
 Done: `.github/workflows/ci.yml` with 3 parallel jobs on every push to `main` and every pull request:
 backend (ruff lint + format incl. `main.py`, pytest), frontend (oxlint, Prettier, Vitest, type-checked build),
 Docker (builds both images). Uses the current action versions (checkout/setup-python/setup-node v7), pip and
 npm caches, and read-only permissions; a newer push cancels an older run. CI badge added to the README.
-**Still to prove:** a green run on GitHub, which needs the push.
+**Proven:** the first run on GitHub passed all 3 jobs in ~75 s.
 
 GitHub Actions on every push: backend (`ruff`, `pytest`) and frontend (`lint`, `format:check`, `test`, `build`).
 A green badge in the README.
@@ -106,3 +106,4 @@ A green badge in the README.
 | 1 – Vercel configuration | 2026-10-25 | ✅ Approved | `main.py` entry (snapshot by default, frontend via `app.frontend`), root `requirements.txt` (pins checked by a test), `vercel.json`; local single-process run passes the demo walk-through 13/13; function ~173 MB of 500 MB |
 | 2 – Deploy on Vercel | 2026-10-25 | ✅ Done | Live at https://qvtzrm.vercel.app (root `app` imported as a single FastAPI project); no login needed; demo 13/13, axe 0, no errors; cache + security headers added and verified after auto-redeploy |
 | 3 – README | 2026-10-25 | ✅ Approved | All four brief requirements (files/dirs, how to start, Vercel link, AI-use note, wording approved) plus results, rule, architecture, API, testing, limitations; links checked; planning files moved to `docs/` |
+| 4 – CI | 2026-10-25 | ✅ Approved | GitHub Actions: backend, frontend and Docker jobs in parallel; first run green in ~75 s; badge in the README |
